@@ -1,0 +1,7 @@
+eg/drummer
+lib/MIDI/Simple/Drummer.pm
+Makefile.PL
+MANIFEST			This list of files
+MANIFEST.SKIP
+t/MIDI-Simple-Drummer.t
+META.yml                                 Module meta-data (added by MakeMaker)
