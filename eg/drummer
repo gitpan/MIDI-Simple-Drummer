@@ -3,76 +3,43 @@ use strict;
 use warnings;
 
 use MIDI::Simple::Drummer;
-my $d = MIDI::Simple::Drummer->new(-bpm => shift || 100);
-
+my $d = MIDI::Simple::Drummer->new(
+    -bpm     => shift || 111,
+    -volume  => shift || 121,
+    -phrases => shift || 2,
+);
 #use Data::Dumper;local$Data::Dumper::Indent=1;local$Data::Dumper::Terse=1;local$Data::Dumper::Sortkeys=1;
 #die Dumper($d->p2n);
+
 $d->count_in();
 
 my $last_fill = 0;
 
 for(0 .. $d->phrases - 1) {
-    $d->beat_2(-fill => $_);
-    $d->beat_3;
-#    if($_ % 2 > 0) {
-#        $d->beat_5;
-#        $last_fill = $d->fill(-last => $last_fill);
+    if($_ % 2 > 0) {
+        $d->play(-n => 5);
+#        $last_fill = $d->play(-type => 'fill');
 #        $last_fill = $d->fill(-n => 3);
-        $last_fill = $d->fill();
-warn"last_fill: $last_fill\n";
-#    }
-#    else {
-#        $d->beat_4;
-#    }
+        $last_fill = $d->fill(-last => $last_fill);
+    }
+    else {
+        $d->play(-n => 3, -fill => $_);
+    }
 }
-#$d->option_patch();
+
+#fin($d);
+$d->pattern('fin', \&fin);
+$d->play(-n => 'fin');
+
 $d->write;
 
-__END__
-  'Acoustic Bass Drum' => '35',
-  'Acoustic Snare' => '38',
-  'Bass Drum 1' => '36',
-  'Cabasa' => '69',
-  'Chinese Cymbal' => '52',
-  'Claves' => '75',
-  'Closed Hi-Hat' => '42',
-  'Cowbell' => '56',
-  'Crash Cymbal 1' => '49',
-  'Crash Cymbal 2' => '57',
-  'Electric Snare' => '40',
-  'Hand Clap' => '39',
-  'Hi Bongo' => '60',
-  'Hi Wood Block' => '76',
-  'Hi-Mid Tom' => '48',
-  'High Agogo' => '67',
-  'High Floor Tom' => '43',
-  'High Timbale' => '65',
-  'High Tom' => '50',
-  'Long Guiro' => '74',
-  'Long Whistle' => '72',
-  'Low Agogo' => '68',
-  'Low Bongo' => '61',
-  'Low Conga' => '64',
-  'Low Floor Tom' => '41',
-  'Low Timbale' => '66',
-  'Low Tom' => '45',
-  'Low Wood Block' => '77',
-  'Low-Mid Tom' => '47',
-  'Maracas' => '70',
-  'Mute Cuica' => '78',
-  'Mute Hi Conga' => '62',
-  'Mute Triangle' => '80',
-  'Open Cuica' => '79',
-  'Open Hi Conga' => '63',
-  'Open Hi-Hat' => '46',
-  'Open Triangle' => '81',
-  'Pedal Hi-Hat' => '44',
-  'Ride Bell' => '53',
-  'Ride Cymbal 1' => '51',
-  'Ride Cymbal 2' => '59',
-  'Short Guiro' => '73',
-  'Short Whistle' => '71',
-  'Side Stick' => '37',
-  'Splash Cymbal' => '55',
-  'Tambourine' => '54',
-  'Vibraslap' => '58'
+sub fin {
+    my $d = shift;
+    $d->strike($d->EIGHTH, $d->kit($d->option_patch));
+    $d->strike($d->EIGHTH, $d->kit('Splash Cymbal'), $d->kit('Bass Drum 1'));
+    $d->strike($d->SIXTEENTH, $d->kit('Acoustic Snare')) for 0 .. 2;
+    $d->rest($d->SIXTEENTH);
+    $d->strike($d->EIGHTH, $d->kit('Splash Cymbal'), $d->kit('Bass Drum 1'));
+    $d->strike($d->SIXTEENTH, $d->kit('Acoustic Snare')) for 0 .. 2;
+    $d->strike($d->EIGHTH, $d->kit('Crash Cymbal 1'), $d->kit('Bass Drum 1'));
+}

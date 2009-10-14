@@ -1,7 +1,7 @@
 --- #YAML:1.0
 name:               MIDI-Simple-Drummer
-version:            0.00_03
-abstract:           Glorified metronome
+version:            0.00_04
+abstract:           Glorified Metronome
 author:
     - Gene Boggs <gene@cpan.org>
 license:            perl
@@ -11,8 +11,7 @@ configure_requires:
 build_requires:
     ExtUtils::MakeMaker:  0
 requires:
-    MIDI:        0
-    Test::More:  0
+    MIDI:  0
 no_index:
     directory:
         - t
