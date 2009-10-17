@@ -1,6 +1,5 @@
 MIDI-Simple-Drummer
 
-
 INSTALLATION
 
 Using CPAN:
@@ -18,7 +17,6 @@ Do it by hand:
     make
     make test
     make install
-
 
 SUPPORT AND DOCUMENTATION
 
@@ -40,7 +38,6 @@ You can also look for information at:
     Search CPAN
         http://search.cpan.org/dist/MIDI-Simple-Drummer/
 
-
 COPYRIGHT AND LICENCE
 
 Copyright (C) 2009 Gene Boggs
@@ -50,4 +47,3 @@ under the terms of either: the GNU General Public License as published
 by the Free Software Foundation; or the Artistic License.
 
 See http://dev.perl.org/licenses/ for more information.
-
