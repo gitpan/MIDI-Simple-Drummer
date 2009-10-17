@@ -1,5 +1,5 @@
 package MIDI::Simple::Drummer;
-our $VERSION = '0.00_05';
+our $VERSION = '0.00_06';
 use strict;
 use warnings;
 use MIDI::Simple;
@@ -339,17 +339,20 @@ Is there a drummer in the house?
     -volume  => shift || 121,
     -phrases => shift || 2,
   );
+  my $last_beat = 0;
   my $last_fill = 0;
   $d->count_in();
-  for my $p (0 .. $d->phrases - 1) {
+  for my $p (1 .. $d->phrases) {
+    warn "last_beat $last_beat, last_fill: $last_fill\n";
     if($p % 2 > 0) {
-        $d->beat(-n => 5);
-        $last_fill = $d->fill(-last => $last_fill);
+        $last_beat = $d->beat(-n => 3, -fill => $last_fill);
     }
     else {
-        $d->beat(-n => 3, -fill => $p);
+        $last_beat = $d->beat(-n => 4);
+        $last_fill = $d->fill(-last => $last_fill);
     }
   }
+  $last_beat = $d->beat(-n => 3, -fill => $last_fill);
   $d->pattern('fin', \&fin);
   $d->beat(-n => 'fin');
   $d->write;
