@@ -9,7 +9,7 @@ my $d = MIDI::Simple::Drummer->new(
     -phrases => shift || 2,
 );
 #use Data::Dumper;local$Data::Dumper::Indent=1;local$Data::Dumper::Terse=1;local$Data::Dumper::Sortkeys=1;
-#die Dumper($d->p2n);
+#die Dumper($d->_p2n);
 
 my $last_beat = 0;
 my $last_fill = 0;
@@ -31,9 +31,9 @@ for my $p (1 .. $d->phrases) {
 $last_beat = $d->beat(-n => 3, -fill => $last_fill);
 
 # Add a finishing touch.
-#fin($d); # Perfectly reasonable.
-$d->pattern('fin', \&fin);
-$d->beat(-n => 'fin');
+#fin($d); # Perfectly reasonable but not as sexy.
+$d->pattern('end', \&fin);
+$d->beat(-n => 'end');
 
 $d->write;
 

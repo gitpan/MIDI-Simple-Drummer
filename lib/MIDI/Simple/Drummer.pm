@@ -1,5 +1,5 @@
 package MIDI::Simple::Drummer;
-our $VERSION = '0.00_06';
+our $VERSION = '0.00_07';
 use strict;
 use warnings;
 use MIDI::Simple;
@@ -32,6 +32,7 @@ my %kit = (
         'Low Floor Tom',
     ],
 );
+
 my %beats = (
     1 => sub { # Quater-note rock beat: qn cym. qn k on 1 & 3. qn s on 2 & 4.
         my $self = shift;
@@ -44,8 +45,8 @@ my %beats = (
 #            'Tambourine', # Maybe...
 #            'Cowbell', # Maybe not.
         ];
-        for(1 .. $self->{-beats}) {
-            my $n = $self->rotate($_, $args{-rotate});
+        for my $beat (1 .. $self->{-beats}) {
+            my $n = $self->rotate($beat, $args{-rotate});
             $self->note(
                 QUARTER(),
                 $self->strike($self->option_strike(%args, -options => $options)),
@@ -56,11 +57,8 @@ my %beats = (
     2 => sub { # Basic rock beat: en c-hh. qn k1,3. qn s2,4. Crash after fill.
         my $self = shift;
         my %args = @_;
-        for(1 .. $self->{-beats}) {
-            my $n = $self->rotate($_, $args{-rotate});
-            my $c = $_ == 1 && $args{-fill}
-                ? $self->strike($self->option_strike(%args))
-                : $self->strike('Closed Hi-Hat');
+        for my $beat (1 .. $self->{-beats}) {
+            my($c, $n) = $self->backbeat_fill(%args, -beat => $beat);
             $self->note(EIGHTH(), $c, $n);
             $self->note(EIGHTH(), $self->strike('Closed Hi-Hat'));
         }
@@ -68,13 +66,10 @@ my %beats = (
     3 => sub { # Main rock beat: en c-hh. qn k1,3,3&. qn s2,4.
         my $self = shift;
         my %args = @_;
-        for(1 .. $self->{-beats}) {
-            my $n = $self->rotate($_, $args{-rotate});
-            my $c = $_ == 1 && $args{-fill}
-                ? $self->strike($self->option_strike(%args))
-                : $self->strike('Closed Hi-Hat');
+        for my $beat (1 .. $self->{-beats}) {
+            my($c, $n) = $self->backbeat_fill(%args, -beat => $beat);
             $self->note(EIGHTH(), $c, $n);
-            if($_ == 3) {
+            if($beat == 3) {
                 $self->note(EIGHTH(), $self->strike('Closed Hi-Hat', 'Acoustic Bass Drum'));
             }
             else {
@@ -85,13 +80,10 @@ my %beats = (
     4 => sub { # Syncopated rock beat 1: en c-hh. qn k1,3,4&. qn s2,4.
         my $self = shift;
         my %args = @_;
-        for(1 .. $self->{-beats}) {
-            my $n = $self->rotate($_, $args{-rotate});
-            my $c = $_ == 1 && $args{-fill}
-                ? $self->strike($self->option_strike(%args))
-                : $self->strike('Closed Hi-Hat');
+        for my $beat (1 .. $self->{-beats}) {
+            my($c, $n) = $self->backbeat_fill(%args, -beat => $beat);
             $self->note(EIGHTH(), $c, $n);
-            if($_ == 4) {
+            if($beat == 4) {
                 $self->note(EIGHTH(), $self->strike('Closed Hi-Hat', 'Acoustic Bass Drum'));
             }
             else {
@@ -102,16 +94,13 @@ my %beats = (
     5 => sub { # Syncopated rock beat 2: en c-hh. qn k1,3,3&,4&. qn s2,4.
         my $self = shift;
         my %args = @_;
-        for(1 .. $self->{-beats}) {
-            my $n = $self->rotate($_, $args{-rotate});
-            my $c = $_ == 1 && $args{-fill}
-                ? $self->strike($self->option_strike(%args))
-                : $self->strike('Closed Hi-Hat');
+        for my $beat (1 .. $self->{-beats}) {
+            my($c, $n) = $self->backbeat_fill(%args, -beat => $beat);
             $self->note(EIGHTH(), $c, $n);
-            if($_ == 3) {
+            if($beat == 3) {
                 $self->note(EIGHTH(), $self->strike('Closed Hi-Hat', 'Acoustic Bass Drum'));
             }
-            elsif($_ == 4) {
+            elsif($beat == 4) {
                 $self->note(EIGHTH(), $self->strike('Closed Hi-Hat', 'Acoustic Bass Drum'));
             }
             else {
@@ -120,47 +109,62 @@ my %beats = (
         }
     },
 );
+
 my %fills = (
     1 => sub {
         my $self = shift;
-        my %args = @_;
-        $args{-patch} ||= $kit{-backbeat}->[0];
-        my $patch = $self->strike($args{-patch});
-        $self->note(QUARTER(), $patch) for 0 .. 1;
-        $self->note(EIGHTH(), $patch) for 0 .. 3;
+        my $strike = $self->backbeat_strike(@_);
+        $self->note(QUARTER(), $strike) for 0 .. 1;
+        $self->note(EIGHTH(), $strike) for 0 .. 3;
     },
     2 => sub {
         my $self = shift;
-        my %args = @_;
-        $args{-patch} ||= $kit{-backbeat}->[0];
-        my $patch = $self->strike($args{-patch});
-        $self->note(EIGHTH(), $patch) for 0 .. 1;
+        my $strike = $self->backbeat_strike(@_);
+        $self->note(EIGHTH(), $strike) for 0 .. 1;
         $self->rest(EIGHTH());
-        $self->note(EIGHTH(), $patch);
-        $self->note(QUARTER(), $patch) for 0 .. 1;
+        $self->note(EIGHTH(), $strike);
+        $self->note(QUARTER(), $strike) for 0 .. 1;
     },
     3 => sub {
         my $self = shift;
-        my %args = @_;
-        $args{-patch} ||= $kit{-backbeat}->[0];
-        my $patch = $self->strike($args{-patch});
-        $self->note(EIGHTH(), $patch) for 0 .. 1;
+        my $strike = $self->backbeat_strike(@_);
+        $self->note(EIGHTH(), $strike) for 0 .. 1;
         $self->rest(EIGHTH());
-        $self->note(EIGHTH(), $patch) for 0 .. 2;
+        $self->note(EIGHTH(), $strike) for 0 .. 2;
         $self->rest(EIGHTH());
-        $self->note(EIGHTH(), $patch);
+        $self->note(EIGHTH(), $strike);
     },
     4 => sub {
         my $self = shift;
-        my %args = @_;
-        $args{-patch} ||= $kit{-backbeat}->[0];
-        my $patch = $self->strike($args{-patch});
-        $self->note(QUARTER(), $patch) for 0 .. 1;
-        $self->note(SIXTEENTH(), $patch) for 0 .. 3;
-        $self->note(QUARTER(), $patch);
+        my $strike = $self->backbeat_strike(@_);
+        $self->note(QUARTER(), $strike) for 0 .. 1;
+        $self->note(SIXTEENTH(), $strike) for 0 .. 3;
+        $self->note(QUARTER(), $strike);
     },
 );
 
+# Return the first backbeat strike unless a patch is given.
+sub backbeat_strike {
+    my $self = shift;
+    my %args = @_;
+    $args{-patch} ||= $kit{-backbeat}->[0];
+    my $patch = $self->strike($args{-patch});
+    return $patch;
+}
+
+# Return the backbeat and post-fill note.
+sub backbeat_fill {
+    my $self = shift;
+    my %args = @_;
+    $args{-beat} ||= 1;
+    my $c = $args{-beat} == 1 && $args{-fill}
+        ? $self->strike($self->option_strike(%args))
+        : $self->strike('Closed Hi-Hat');
+    my $n = $self->rotate($args{-beat}, $args{-rotate});
+    return $c, $n;
+}
+
+# Beat or fill?
 sub pattern {
     my $self = shift;
     my $n = shift || return;
@@ -177,10 +181,10 @@ sub pattern {
 }
 
 # Note values.
-sub WHOLE     {'wn'}
-sub HALF      {'hn'}
-sub QUARTER   {'qn'}
-sub EIGHTH    {'en'}
+sub WHOLE {'wn'}
+sub HALF {'hn'}
+sub QUARTER {'qn'}
+sub EIGHTH {'en'}
 sub SIXTEENTH {'sn'}
 #sub THIRTYSECOND {'tn'} ?
 #sub SIXTYFOURTH {'fn'} ?
@@ -219,7 +223,7 @@ sub write {
     my $self = shift;
     my $file = shift || $self->{-file};
     $self->{-score}->write_score($file);
-    return -e $self->{-file};
+    return -e $self->{-file} ? $file : 0;
 }
 
 # o/` How many more times? Treat me the way you wanna do?
@@ -230,14 +234,22 @@ sub phrases {
 }
 
 # Please, just the facts Ma'am.
-sub n2p { return {%MIDI::notenum2percussion} }
-sub p2n { return {%MIDI::percussion2notenum} }
+sub beats {
+    my $self = shift;
+    $self->{-beats} = shift if @_;
+    return $self->{-beats}
+}
 
+# Please, just the facts Ma'am.
+sub _n2p { return {%MIDI::notenum2percussion} }
+sub _p2n { return {%MIDI::percussion2notenum} }
+
+# Give us note values.
 sub strike {
     my $self = shift;
     my @patches = @_;
     my @notes = map { 'n' . $MIDI::percussion2notenum{$_} } @patches;
-    return wantarray ? @notes : join(',', @notes);
+    return wantarray ? @notes : join(', ', @notes);
 }
 
 # TODO Accent the 1s by default. Add to score optional.
@@ -246,6 +258,7 @@ sub metronome {
     my $patch = shift || 'Pedal Hi-Hat';
     $self->note(QUARTER(), $self->strike($patch))
         for 1 .. $self->{-beats} * $self->{-phrases};
+    return $self->{-beats} * $self->{-phrases};
 }
 
 # TODO Prepend to score?
@@ -271,7 +284,7 @@ sub option_strike {
     my %args = @_;
     my $options = $args{-options} || $kit{-crash};
     my $patch = $args{-patch} || $options->[rand(@$options)];
-warn"option_strike $patch\n";
+#warn"option_strike $patch\n";
     return $patch;
 }
 
@@ -301,7 +314,7 @@ sub beat {
         ? keys %fills : keys %beats;
     # Choose a random pattern if desired.
     while($n eq 0 || $n eq $args{-last}) {
-        $n = int(rand($k)) + 1;
+        $n = int(rand($k));
     }
     # To fill or not to fill...
     if($args{-type} && $args{-type} eq 'fill') {
@@ -386,16 +399,23 @@ Source.
 
 =head2 * phrases()
 
-  $d->phrases($p);
-  $p = $d->phrases();
+  $d->phrases($x);
+  $x = $d->phrases();
 
 Set or return the number of phrases to play.
 
+=head2 * beats()
+
+  $d->beats($x);
+  $x = $d->beats();
+
+Set or return the number of beats per measure.
+
 =head2 * strike()
 
-  $strike = $d->strike('Cowbell'); # 'n56'
-  $strike = $d->strike('Cowbell', 'Tambourine'); # 'n56, n54')
-  @strike = $d->strike('Cowbell', 'Tambourine'); # ('n56', 'n54')
+  $x = $d->strike('Cowbell'); # 'n56'
+  $x = $d->strike('Cowbell', 'Tambourine'); # 'n56, n54'
+  @x = $d->strike('Cowbell', 'Tambourine'); # ('n56', 'n54')
 
 Return note values for percussion names with
 C<%MIDI::notenum2percussion> in either list or scalar context.
@@ -411,7 +431,7 @@ supply) to the score.
 =head2 * count_in()
 
   $d->count_in();
-  $d->count_in(2); # Bars
+  $d->count_in(2); # Number of bars.
   $d->count_in(1, 'Side Stick'); # Bars and patch.
 
 And a-one and a-two and a-one, two, three!E<lt>E<sol>Lawrence WelkE<gt>
@@ -421,14 +441,14 @@ If No arguments are provided, the C<Closed Hi-Hat> is used.
 
 =head2 * rotate()
 
-  $n = $d->rotate(1); # n38
-  $n = $d->rotate(2, ['Side Stick', 'Bass Drum 1']); n36
-  $n = $d->rotate(#, []); # n
+  $x = $d->rotate(3);
+  $x = $d->rotate(4, ['Side Stick', 'Bass Drum 1']);
+  $x = $d->rotate(5, ['Mute Hi Conga', 'Open Hi Conga', 'Low Conga']);
 
-Return the rotating back-beat of the rhythm. By default, this is
-the alternating snare and kick.  This can be any number of patches you
-desire by providing a third array reference argument with the patch
-names.
+Return the rotating back-beat of the rhythm based on the beat, given
+by the first argument.  By default, this is the alternating snare and
+kick.  This can be any number of patches you desire by providing an
+array reference argument with the patch names.
 
 =head2 * option_strike()
 
@@ -455,11 +475,11 @@ Add a rest to the score.  This is just a pass-through to L<MIDI::Simple/r>.
 
 =head2 * beat()
 
-  $last_beat = $d->beat();
-  $last_beat = $d->beat(-n => 'foo');
-  $last_fill = $d->beat(-type => 'fill', -last => $last_fill);
-  $last_beat = $d->beat(-fill => $last_fill);
-  $last_beat = $d->beat(-last => $last_beat);
+  $x = $d->beat();
+  $x = $d->beat(-n => 'foo');
+  $x = $d->beat(-type => 'fill', -last => $x);
+  $x = $d->beat(-fill => $x);
+  $x = $d->beat(-last => $x);
 
 Play a beat or fill and return the id for the selected pattern.  Beats
 and fills are both just patterns but drummers think of them as
@@ -482,16 +502,16 @@ See the L<MIDI::Simple::Drummer/fill> section for this shortcut.
 
 =head2 * fill()
 
-  $last_fill = $d->fill(-n => 'foo');
-  $last_fill = $d->fill(-last => $last_fill);
+  $x = $d->fill(-n => 'foo');
+  $x = $d->fill(-last => $x);
 
 This is just an alias for C<$d-E<gt>beat(-type =E<gt> 'fill', %args)>.
 
 =head2 * pattern()
 
-  $p = $d->pattern(1);
-  $p = $d->pattern('paraflamaramadiddle', $coderef);
-  $p = $d->pattern('paraflamaramadiddle', $coderef, -type => 'fill');
+  $x = $d->pattern(1);
+  $x = $d->pattern('paraflamaramadiddle', $coderef);
+  $x = $d->pattern('paraflamaramadiddle', $coderef, -type => 'fill');
 
 Return the code reference to the named pattern.  If a second, coderef
 argument is provided, the named pattern is assigned to it.  A third
@@ -514,6 +534,8 @@ needing to remember/type MIDI variables.
 
 =head2 * WHOLE
 
+  $d->WHOLE();
+
 Return C<'wn'>.
 
 =head2 * HALF
@@ -532,11 +554,11 @@ Return C<'en'>.
 
 Return C<'sn'>.
 
-=head2 * p2n()
+=head2 * _p2n()
 
 Return C<%MIDI::percussion2notenum> a la L<MIDI/GOODIES>.
 
-=head2 * n2p()
+=head2 * _n2p()
 
 Return the inverse: C<%MIDI::notenum2percussion>.
 

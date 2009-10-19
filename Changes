@@ -1,6 +1,10 @@
 Revision history for MIDI-Simple-Drummer
 
 0.00_06 Sat Oct 17, 2009
+    - Added tests!
+    - Cleaned up code and POD.
+
+0.00_06 Sat Oct 17, 2009
     - Fixed eq/drummer that was "backwards."
     - Made the package synopsis identical to eg/drummer.
 
