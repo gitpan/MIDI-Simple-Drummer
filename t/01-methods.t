@@ -1,8 +1,7 @@
 #!perl -T
 use strict;
 use warnings;
-
-use Test::More tests => 40;
+use Test::More tests => 44;
 
 BEGIN { use_ok('MIDI::Simple::Drummer') }
 
@@ -51,6 +50,13 @@ is $x, 'n56, n54', "strike patches string";
 $x = join(', ', $d->strike('Cowbell', 'Tambourine'));
 is $x, 'n56, n54', "strike patches list";
 
+$x = $d->snare;
+is $x, 'n38', "snare";
+$x = $d->tick;
+is $x, 'n42', "tick";
+$x = $d->kicktick;
+is $x, 'n35, n37', "kicktick";
+
 $x = $d->option_strike();
 like $x, qr/n(?:5[257]|49)/, "option_strike";
 $x = $d->option_strike(-patch => 'Cowbell');
@@ -84,18 +90,20 @@ ok $x == 1, "beat=$x";
 $x = $d->beat(-last => 1);
 ok $x != 1, "beat=$x";
 $x = $d->beat(-n => 1, -fill => 1);
-ok $x == 1, "fill=$x";
-$x = $d->beat(-fill => 1, -last => 2);
-ok $x != 2, "fill=$x";
+ok $x == 1, "beat=$x";
+$x = $d->beat(-n => 'foo', -pattern => $z);
+ok $x eq 'foo', "beat=$x";
 
 $x = $d->fill();
 ok $x > 0, "fill=$x";
-$x = $d->fill(-n => 1, -fill => 1);
+$x = $d->fill(-n => 1);
 ok $x == 1, "fill=$x";
-$x = $d->fill(-fill => 1, -last => 2);
+$x = $d->fill(-last => 2);
 ok $x != 2, "fill=$x";
+$x = $d->fill(-n => 'foo', -pattern => $z);
+ok $x eq 'foo', "fill=$x";
 
 $x = $d->write();
 ok $x, "$x write";
-$x = $d->write('foo.mid');
+$x = $d->write('Buddy-Rich.mid');
 ok $x, "$x write";

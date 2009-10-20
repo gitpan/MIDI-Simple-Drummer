@@ -1,12 +1,12 @@
 package MIDI::Simple::Drummer;
-our $VERSION = '0.00_08';
+our $VERSION = '0.00_09';
 use strict;
 use warnings;
 use MIDI::Simple;
 
 # The default drumkit.
 my %KIT = (
-    -hat => 'Closed Hi-Hat',
+    -tick => 'Closed Hi-Hat',
     -hhat => [
         'Closed Hi-Hat', # 42
         'Open Hi-Hat', # 46
@@ -65,7 +65,7 @@ my %beats = (
         for my $beat (1 .. $self->{-beats}) {
             my($c, $n) = $self->_backbeat_rotate(%args, -beat => $beat);
             $self->note(EIGHTH(), $c, $n);
-            $self->note(EIGHTH(), $self->hhat);
+            $self->note(EIGHTH(), $self->tick);
         }
     },
     3 => sub { # Main rock beat: en c-hh. qn k1,3,3&. qn s2,4.
@@ -78,7 +78,7 @@ my %beats = (
                 $self->note(EIGHTH(), $self->kicktick);
             }
             else {
-                $self->note(EIGHTH(), $self->hhat);
+                $self->note(EIGHTH(), $self->tick);
             }
         }
     },
@@ -92,7 +92,7 @@ my %beats = (
                 $self->note(EIGHTH(), $self->kicktick);
             }
             else {
-                $self->note(EIGHTH(), $self->hhat);
+                $self->note(EIGHTH(), $self->tick);
             }
         }
     },
@@ -109,7 +109,7 @@ my %beats = (
                 $self->note(EIGHTH(), $self->kicktick);
             }
             else {
-                $self->note(EIGHTH(), $self->hhat);
+                $self->note(EIGHTH(), $self->tick);
             }
         }
     },
@@ -151,7 +151,7 @@ sub _backbeat_rotate {
     my %args = @_;
     $args{-beat} ||= 1;
     my $c = $args{-beat} == 1 && $args{-fill}
-        ? $self->option_strike(%args) : $self->hhat;
+        ? $self->option_strike(%args) : $self->tick;
     my $n = $self->rotate($args{-beat}, $args{-rotate});
     return $c, $n;
 }
@@ -245,10 +245,10 @@ sub strike {
 }
 
 # Strike or set the closed hi-hat.
-sub hhat {
+sub tick {
     my $self = shift;
-    $KIT{-hhat} = shift if @_;
-    return $self->strike($KIT{-hhat});
+    $KIT{-tick} = shift if @_;
+    return $self->strike($KIT{-tick});
 }
 
 # Strike or set the snare.
@@ -578,10 +578,10 @@ Return C<%MIDI::percussion2notenum> a la L<MIDI/GOODIES>.
 
 Return the inverse: C<%MIDI::notenum2percussion>.
 
-=head2 * hhat()
+=head2 * tick()
 
-    $x = $d->hhat;
-    $x = $d->hhat('Mute Triangle');
+    $x = $d->tick;
+    $x = $d->tick('Mute Triangle');
 
 Strike or set the "tick" patch.  By default, this is the C<Closed Hi-Hat>.
 
