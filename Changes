@@ -1,5 +1,9 @@
 Revision history for MIDI-Simple-Drummer
 
+0.00_10 Mon Oct 19, 2009
+    - Note to self: Read the 0.00_09 change notes.
+    - Fix eg/drummer
+
 0.00_09 Mon Oct 19, 2009
     - Note to self: Don't release a distro when you are more tired
       than alive.

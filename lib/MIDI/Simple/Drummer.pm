@@ -1,5 +1,5 @@
 package MIDI::Simple::Drummer;
-our $VERSION = '0.00_09';
+our $VERSION = '0.00_10';
 use strict;
 use warnings;
 use MIDI::Simple;
@@ -318,7 +318,8 @@ sub beat {
     my %args = @_;
 
     # Is there a new pattern to save?
-    $self->pattern($args{-n}, $args{-pattern}) if $args{-pattern};
+    $self->pattern($args{-n}, $args{-pattern}, -type => $args{-type})
+        if $args{-pattern};
     # Get the pattern id.
     my $n = $args{-n} || 0;
     # Was there a last pattern played?

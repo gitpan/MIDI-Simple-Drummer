@@ -36,11 +36,11 @@ $d->write;
 
 sub fin {
     my $d = shift;
-    $d->note($d->EIGHTH, $d->strike($d->option_strike));
+    $d->note($d->EIGHTH, $d->option_strike);
     $d->note($d->EIGHTH, $d->strike('Splash Cymbal', 'Bass Drum 1'));
-    $d->note($d->SIXTEENTH, $d->strike('Acoustic Snare')) for 0 .. 2;
+    $d->note($d->SIXTEENTH, $d->snare) for 0 .. 2;
     $d->rest($d->SIXTEENTH);
     $d->note($d->EIGHTH, $d->strike('Splash Cymbal', 'Bass Drum 1'));
-    $d->note($d->SIXTEENTH, $d->strike('Acoustic Snare')) for 0 .. 2;
+    $d->note($d->SIXTEENTH, $d->snare) for 0 .. 2;
     $d->note($d->EIGHTH, $d->strike('Crash Cymbal 1', 'Bass Drum 1'));
 }
