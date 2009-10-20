@@ -1,8 +1,10 @@
 Revision history for MIDI-Simple-Drummer
 
-0.00_06 Sat Oct 17, 2009
-    - Added tests!
-    - Cleaned up code and POD.
+0.00_08 Mon Oct 19, 2009
+    - Simplified the public and internal interface.
+
+0.00_07 Sat Oct 17, 2009
+    - Sometihng good happened, I'm sure...
 
 0.00_06 Sat Oct 17, 2009
     - Fixed eq/drummer that was "backwards."

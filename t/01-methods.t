@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 47;
+use Test::More tests => 40;
 
 BEGIN { use_ok('MIDI::Simple::Drummer') }
 
@@ -26,14 +26,14 @@ is $d->QUARTER(), 'qn', "QUARTER";
 is $d->EIGHTH(), 'en', "EIGHTH";
 is $d->SIXTEENTH(), 'sn', "SIXTEENTH";
 
-$d->count_in();
-$x = grep { $_->[0] eq 'note' } @{$d->{-score}{Score}};
-ok $x == $d->beats(), "count_in";
-
-$d = eval { MIDI::Simple::Drummer->new() };
 $d->metronome();
 $x = grep { $_->[0] eq 'note' } @{$d->{-score}{Score}};
 ok $x == $d->beats() * $d->phrases(), "metronome";
+
+$d = eval { MIDI::Simple::Drummer->new() };
+$d->count_in();
+$x = grep { $_->[0] eq 'note' } @{$d->{-score}{Score}};
+ok $x == $d->beats(), "count_in";
 
 $x = $d->pattern(1);
 is ref($x), 'CODE', "get pattern";
@@ -51,17 +51,12 @@ is $x, 'n56, n54', "strike patches string";
 $x = join(', ', $d->strike('Cowbell', 'Tambourine'));
 is $x, 'n56, n54', "strike patches list";
 
-$x = $d->backbeat_strike();
-is $x, 'n38', "backbeat_strike";
-$x = $d->backbeat_strike(-patch => 'Cowbell');
-is $x, 'n56', "backbeat_strike patch";
-
 $x = $d->option_strike();
-like $x, qr/Cymbal/, "option_strike";
+like $x, qr/n(?:5[257]|49)/, "option_strike";
 $x = $d->option_strike(-patch => 'Cowbell');
-is $x, 'Cowbell', "option_strike patch";
+is $x, 'n56', "option_strike patch";
 $x = $d->option_strike(-options => ['Cowbell', 'Tambourine']);
-ok $x eq 'Cowbell' || $x eq 'Tambourine', "option_strike options";
+like $x, qr/n5[46]/, "option_strike options";
 
 $x = $d->rotate();
 is $x, 'n38', "rotate";
@@ -74,21 +69,9 @@ is $x, 'n54', "rotate 1 options";
 $x = $d->rotate(2, ['Cowbell', 'Tambourine']);
 is $x, 'n56', "rotate 2 options";
 
-($x, $y) = $d->backbeat_fill();
-ok $x eq 'n42' && $y eq 'n35', "backbeat_fill";
-($x, $y) = $d->backbeat_fill(-beat => 1);
-ok $x eq 'n42' && $y eq 'n35', "backbeat_fill beat=1";
-($x, $y) = $d->backbeat_fill(-beat => 2);
-ok $x eq 'n42' && $y eq 'n38', "backbeat_fill beat=2";
-($x, $y) = $d->backbeat_fill(-beat => 1, -fill => 1);
-my $n = grep { $x eq 'n'.$_ } qw(49 52 55 57);
-ok $n && $y eq 'n35', "backbeat_fill beat=1 fill=1";
-($x, $y) = $d->backbeat_fill(-beat => 2, -fill => 1);
-ok $x eq 'n42' && $y eq 'n38', "backbeat_fill beat=2 fill=1";
-
 $d = eval { MIDI::Simple::Drummer->new() };
 $d->note('en', 'n56');
-$n = grep { $_->[0] eq 'note' } @{$d->{-score}{Score}};
+my $n = grep { $_->[0] eq 'note' } @{$d->{-score}{Score}};
 is $n, 1, "note";
 $d->rest('en');
 $n = grep { $_->[0] eq 'note' } @{$d->{-score}{Score}};
