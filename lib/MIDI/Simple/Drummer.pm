@@ -1,5 +1,5 @@
 package MIDI::Simple::Drummer;
-our $VERSION = '0.00_11';
+our $VERSION = '0.00_12';
 use strict;
 use warnings;
 use MIDI::Simple;
@@ -179,10 +179,12 @@ sub pattern { # Beats and fills and random flailing, etc.
     # Return all known patterns if no arguments are given.
     return $self->{-patterns} unless @_;
     # Are we given a set of patterns to save?
-    if(ref $ARGV[0] eq 'HASH') {
-        my %p = $ARGV[0];
-        $self->{-patterns}{keys %p} = values %p;
-        return \%p;
+    if(ref $_[0] eq 'HASH') {
+        my $p = $_[0];
+        while(my($k, $v) = each %$p) {
+            $self->{-patterns}{$k} = $v;
+        }
+        return $self->{-patterns};
     }
     else {
         my $n = shift;
@@ -255,7 +257,7 @@ sub beat { # Pattern selector method.
     }
 
     # Beat it.
-    $self->{-patterns}{$n}->($self);
+    $self->{-patterns}{$n}->($self, %args);
     return $n;
 }
 sub fill {
@@ -331,22 +333,22 @@ sub _rock_patterns {
             my $self = shift;
             my %args = @_;
             for my $beat (1 .. $self->{-beats}) {
-                my($c, $n) = $self->_backbeat_rotate(%args, -beat => $beat);
+                my($c, $n) = $self->rotate_backbeat(%args, -beat => $beat);
                 $self->note(EIGHTH(), $c, $n);
-                $self->note(EIGHTH(), $self->hhat);
+                $self->note(EIGHTH(), $self->tick);
             }
         },
         rock_3 => sub { # Main rock beat: en c-hh. qn k1,3,3&. qn s2,4.
             my $self = shift;
             my %args = @_;
             for my $beat (1 .. $self->{-beats}) {
-                my($c, $n) = $self->_backbeat_rotate(%args, -beat => $beat);
+                my($c, $n) = $self->rotate_backbeat(%args, -beat => $beat);
                 $self->note(EIGHTH(), $c, $n);
                 if($beat == 3) {
                     $self->note(EIGHTH(), $self->kicktick);
                 }
                 else {
-                    $self->note(EIGHTH(), $self->hhat);
+                    $self->note(EIGHTH(), $self->tick);
                 }
             }
         },
@@ -354,13 +356,13 @@ sub _rock_patterns {
             my $self = shift;
             my %args = @_;
             for my $beat (1 .. $self->{-beats}) {
-                my($c, $n) = $self->_backbeat_rotate(%args, -beat => $beat);
+                my($c, $n) = $self->rotate_backbeat(%args, -beat => $beat);
                 $self->note(EIGHTH(), $c, $n);
                 if($beat == 4) {
                     $self->note(EIGHTH(), $self->kicktick);
                 }
                 else {
-                    $self->note(EIGHTH(), $self->hhat);
+                    $self->note(EIGHTH(), $self->tick);
                 }
             }
         },
@@ -368,16 +370,13 @@ sub _rock_patterns {
             my $self = shift;
             my %args = @_;
             for my $beat (1 .. $self->{-beats}) {
-                my($c, $n) = $self->_backbeat_rotate(%args, -beat => $beat);
+                my($c, $n) = $self->rotate_backbeat(%args, -beat => $beat);
                 $self->note(EIGHTH(), $c, $n);
-                if($beat == 3) {
-                    $self->note(EIGHTH(), $self->kicktick);
-                }
-                elsif($beat == 4) {
+                if($beat == 3 || $beat == 4) {
                     $self->note(EIGHTH(), $self->kicktick);
                 }
                 else {
-                    $self->note(EIGHTH(), $self->hhat);
+                    $self->note(EIGHTH(), $self->tick);
                 }
             }
         },
