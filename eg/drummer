@@ -8,8 +8,6 @@ my $d = MIDI::Simple::Drummer->new(
     -volume  => shift || 121,
     -phrases => shift || 2,
 );
-#use Data::Dumper;local$Data::Dumper::Indent=1;local$Data::Dumper::Terse=1;local$Data::Dumper::Sortkeys=1;
-#die Dumper($d->_p2n);
 
 my $beat = 0;
 my $fill = 0;
@@ -17,20 +15,21 @@ my $fill = 0;
 $d->count_in();
 
 for my $p (1 .. $d->phrases) {
-    warn "beat $beat, fill: $fill\n";
+    warn "p: $p, beat $beat, fill: $fill\n";
     if($p % 2 > 0) {
-        $beat = $d->beat(-n => 3, -fill => $fill);
+        $beat = $d->beat(-name => 'rock_3', -fill => $fill);
+        $fill = $d->fill(-last => $fill);
     }
     else {
-        $beat = $d->beat(-n => 4);
+        $beat = $d->beat(-name => 'rock_4');
         $fill = $d->fill(-last => $fill);
     }
 }
-
-$beat = $d->beat(-last => $beat, -fill => $fill);
-
-#fin($d); # Perfectly reasonable but not as sexy.
-$d->fill(-n => 'end', -pattern => \&fin, -type => 'fill');
+#$beat = $d->beat(-last => $beat, -fill => $fill);
+#fin($d); # This is perfectly reasonable but not as sexy.
+$d->pattern(end => \&fin, -type => 'fill');
+$d->fill(-name => 'end');
+#$d->crash;
 
 $d->write;
 
