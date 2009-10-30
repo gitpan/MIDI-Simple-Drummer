@@ -1,5 +1,10 @@
 Revision history for MIDI-Simple-Drummer
 
+0.00_13 Thu Oct 29, 2009
+    - Collapsed known pattern code.
+    - Improved POD.
+    - Made eg/basics a more useful example.
+
 0.00_12 Thu Oct 29, 2009
     - Whoops. Recorrectified.
 
@@ -21,7 +26,7 @@ Revision history for MIDI-Simple-Drummer
     - Simplified the public and internal interface.
 
 0.00_07 Sat Oct 17, 2009
-    - Sometihng good happened, I'm sure...
+    - Something good happened, I'm sure...
 
 0.00_06 Sat Oct 17, 2009
     - Fixed eq/drummer that was "backwards."

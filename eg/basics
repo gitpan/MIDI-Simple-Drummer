@@ -2,8 +2,12 @@
 use strict;
 use warnings;
 use MIDI::Simple::Drummer;
-my $d = MIDI::Simple::Drummer->new();
+my $d = MIDI::Simple::Drummer->new(-bpm => 100);
 #use Data::Dumper;local$Data::Dumper::Indent=1;local$Data::Dumper::Terse=1;local$Data::Dumper::Sortkeys=1;
 #die Dumper($d->_p2n);
 $d->count_in;
+for(1 .. $d->phrases * $d->beats) {
+    $d->note($d->EIGHTH, $d->rotate_backbeat(-beat => $_));
+    $d->note($d->EIGHTH, $d->tick);
+}
 $d->write("$0.mid");

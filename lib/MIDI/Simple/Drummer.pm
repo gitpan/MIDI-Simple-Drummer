@@ -1,5 +1,5 @@
 package MIDI::Simple::Drummer;
-our $VERSION = '0.00_12';
+our $VERSION = '0.00_13';
 use strict;
 use warnings;
 use MIDI::Simple;
@@ -333,8 +333,7 @@ sub _rock_patterns {
             my $self = shift;
             my %args = @_;
             for my $beat (1 .. $self->{-beats}) {
-                my($c, $n) = $self->rotate_backbeat(%args, -beat => $beat);
-                $self->note(EIGHTH(), $c, $n);
+                $self->note(EIGHTH(), $self->rotate_backbeat(%args, -beat => $beat));
                 $self->note(EIGHTH(), $self->tick);
             }
         },
@@ -342,8 +341,7 @@ sub _rock_patterns {
             my $self = shift;
             my %args = @_;
             for my $beat (1 .. $self->{-beats}) {
-                my($c, $n) = $self->rotate_backbeat(%args, -beat => $beat);
-                $self->note(EIGHTH(), $c, $n);
+                $self->note(EIGHTH(), $self->rotate_backbeat(%args, -beat => $beat));
                 if($beat == 3) {
                     $self->note(EIGHTH(), $self->kicktick);
                 }
@@ -356,8 +354,7 @@ sub _rock_patterns {
             my $self = shift;
             my %args = @_;
             for my $beat (1 .. $self->{-beats}) {
-                my($c, $n) = $self->rotate_backbeat(%args, -beat => $beat);
-                $self->note(EIGHTH(), $c, $n);
+                $self->note(EIGHTH(), $self->rotate_backbeat(%args, -beat => $beat));
                 if($beat == 4) {
                     $self->note(EIGHTH(), $self->kicktick);
                 }
@@ -370,8 +367,7 @@ sub _rock_patterns {
             my $self = shift;
             my %args = @_;
             for my $beat (1 .. $self->{-beats}) {
-                my($c, $n) = $self->rotate_backbeat(%args, -beat => $beat);
-                $self->note(EIGHTH(), $c, $n);
+                $self->note(EIGHTH(), $self->rotate_backbeat(%args, -beat => $beat));
                 if($beat == 3 || $beat == 4) {
                     $self->note(EIGHTH(), $self->kicktick);
                 }
@@ -424,11 +420,14 @@ Is there a drummer in the house?
 =head1 SYNOPSIS
 
   use MIDI::Simple::Drummer;
-  my $d = MIDI::Simple::Drummer->new;
+  my $d = MIDI::Simple::Drummer->new(-bpm => 100);
 
   # A glorified metronome:
   $d->count_in;
-  $d->rotate_backbeat for 1 .. $d->phrases;
+  for(1 .. $d->phrases * $d->beats) {
+    $d->note($d->EIGHTH, $d->rotate_backbeat(-beat => $_));
+    $d->note($d->EIGHTH, $d->tick);
+  }
 
   # A smarter drummer:
   my($beat, $fill) = (0, 0);
@@ -442,7 +441,6 @@ Is there a drummer in the house?
         $fill = $d->fill(-last => $fill);
     }
   }
-  $d->beat(-last => $beat, -fill => $fill);
   $d->pattern('fin', \&fin);
   $d->beat(-name => 'fin');
   $d->write;
@@ -453,8 +451,6 @@ Is there a drummer in the house?
     $d->note($d->SIXTEENTH, $d->snare) for 0 .. 2;
     $d->rest($d->SIXTEENTH);
     $d->note($d->EIGHTH, $d->strike('Splash Cymbal','Bass Drum 1'));
-    $d->note($d->SIXTEENTH, $d->snare) for 0 .. 2;
-    $d->note($d->EIGHTH, $d->strike('Crash Cymbal 1','Bass Drum 1'));
   }
 
 =head1 DESCRIPTION
@@ -463,7 +459,17 @@ This module is embroyonic but may yet grow into a giant reptilian
 monster that smashes Tokyo.
 
 Until then, this is just meant to be a robotic drummer and hide the
-L<MIDI::Simple> parameters.
+L<MIDI::Simple> details.  It is B<not> a "drum machine", that you have
+to "program" with some arcane specification syntax.  Rather, it will
+evolve into a sufficiently intelligent drummer, that you can jam with.
+
+Note that B<you>, the user, should know what the patterns are named
+and what they do.  For this, see the L<MIDI::Simple::Drummer/pattern>
+method.
+
+Since we are talking about patterns (A.K.A. beats and fills), this is
+entirely perl logic based, so you could use a Markov chain, stochastic
+techniques or a L<Parse::RecDescent> grammar, even.
 
 =head1 METHODS
 
@@ -474,26 +480,43 @@ L<MIDI::Simple> parameters.
 Far away in a distant galaxy... But nevermind that, Luke. Use The
 Source.
 
+Currently, the accepted attributes are:
+
+  # Rhythm metrics:
+  -bpm      => 120,
+  -phrases  => 4,
+  -beats    => 4,
+  # MIDI settings:
+  -channel  => '9',
+  -volume   => '100',
+  # The Goods[TM]:
+  -patterns => undef,
+  -kit      => undef,
+  -file     => 'Drummer.mid',
+  -score    => MIDI::Simple->new_score,
+
+These can all be overridden by supplying them to the constuctor.
+
 =head2 * phrases()
 
+  $x = $d->phrases;
   $d->phrases($x);
-  $x = $d->phrases();
 
-Set or return the number of phrases to play.
+Return or set the number of phrases to play.
 
 =head2 * beats()
 
+  $x = $d->beats;
   $d->beats($x);
-  $x = $d->beats();
 
-Set or return the number of beats per measure.
+Return or set the number of beats per measure.
 
 =head2 * score()
 
+  $x = $d->score;
   $d->score($x);
-  $x = $d->score();
 
-Set or return the L<MIDI::Simple/score> object.
+Return or set the L<MIDI::Simple/score> object.
 
 =head2 * hhat()
 
@@ -581,7 +604,7 @@ list context. (Default predefined snare patch.)
 
 =head2 * option_strike()
 
-  $x = $d->option_strike();
+  $x = $d->option_strike;
   $x = $d->option_strike('Short Guiro','Short Whistle','Vibraslap');
 
 Return a note value from a list of patches (default predefined crash
@@ -606,15 +629,15 @@ L<MIDI::Simple/r>.
 
 =head2 * metronome()
 
-  $d->metronome();
+  $d->metronome;
   $d->metronome('Mute Triangle');
 
-Add beats * phases.  If No arguments are provided, the C<Pedal Hi-Hat>
-is used.
+Add beats * phases of the C<Pedal Hi-Hat>, unless another patch is
+provided.
 
 =head2 * count_in()
 
-  $d->count_in();
+  $d->count_in;
   $d->count_in(2);
   $d->count_in(1, 'Side Stick');
 
@@ -646,7 +669,7 @@ made.
 
 =head2 * beat()
 
-  $x = $d->beat();
+  $x = $d->beat;
   $x = $d->beat(-name => $x);
   $x = $d->beat(-last => $x);
   $x = $d->beat(-fill => $x);
@@ -719,7 +742,7 @@ and type the relevant MIDI variables.
 
 =head2 * WHOLE
 
-  $d->WHOLE();
+  $d->WHOLE;
 
 Return C<'wn'>.
 
@@ -751,12 +774,18 @@ Return the inverse: C<%MIDI::notenum2percussion>.
 
 * It don't mean a thing if it ain't got that swing.
 
+* Make any and all appropriate C<MIDI::Simple> parameters available
+in the constructor.
+
 * Intelligently modulate dynamics (i.e. "add nuance" like accent or
 crescendo).
 
-* Hide and read the patterns repertoire.
+* Possibly load patterns automatically with C<qw(:rock)> syntax, in
+the C<use> line.
 
-* Load patterns automatically C<qw(:rock)>, etc. in the C<use> line.
+* Import patterns via L<MIDI::Simple/read_score>, maybe.
+
+* Leverage L<MIDI::Tab/from_drum_tab>, possibly.
 
 =head1 SEE ALSO
 
