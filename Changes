@@ -1,5 +1,9 @@
 Revision history for MIDI-Simple-Drummer
 
+0.00_14 Sat Oct 31, 2009
+    - Reorganized POD sections.
+    - Renamed the fill aptterns to be more meaningful.
+
 0.00_13 Thu Oct 29, 2009
     - Collapsed known pattern code.
     - Improved POD.

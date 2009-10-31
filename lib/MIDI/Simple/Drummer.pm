@@ -1,5 +1,5 @@
 package MIDI::Simple::Drummer;
-our $VERSION = '0.00_13';
+our $VERSION = '0.00_14';
 use strict;
 use warnings;
 use MIDI::Simple;
@@ -377,19 +377,19 @@ sub _rock_patterns {
             }
         },
         # Fills.
-        'rock_1 fill' => sub {
+        'snare_1 fill' => sub {
             my $self = shift;
             $self->note(QUARTER(), $self->snare) for 0 .. 1;
             $self->note(EIGHTH(), $self->snare) for 0 .. 3;
         },
-        'rock_2 fill' => sub {
+        'snare_2 fill' => sub {
             my $self = shift;
             $self->note(EIGHTH(), $self->snare) for 0 .. 1;
             $self->rest(EIGHTH());
             $self->note(EIGHTH(), $self->snare);
             $self->note(QUARTER(), $self->snare) for 0 .. 1;
         },
-        'rock_3 fill' => sub {
+        'snare_3 fill' => sub {
             my $self = shift;
             $self->note(EIGHTH(), $self->snare) for 0 .. 1;
             $self->rest(EIGHTH());
@@ -397,7 +397,7 @@ sub _rock_patterns {
             $self->rest(EIGHTH());
             $self->note(EIGHTH(), $self->snare);
         },
-        'rock_4 fill' => sub {
+        'snare_4 fill' => sub {
             my $self = shift;
             $self->note(QUARTER(), $self->snare) for 0 .. 1;
             $self->note(SIXTEENTH(), $self->snare) for 0 .. 3;
@@ -517,79 +517,6 @@ Return or set the number of beats per measure.
   $d->score($x);
 
 Return or set the L<MIDI::Simple/score> object.
-
-=head2 * hhat()
-
-    $x = $d->hhat;
-    $x = $d->hhat(['Cabasa','Maracas','Claves']);
-
-Strike or set the "hhat" patches.  By default, these are the
-C<Closed Hi-Hat>, C<Open Hi-Hat> and the C<Pedal Hi-Hat.>
-
-=head2 * crash()
-
-    $x = $d->crash;
-    $x = $d->crash(\@crashes);
-
-Strike or set the "crash" patches.  By default, these are the
-C<Chinese Cymbal>, C<Crash Cymbal 1>, C<Crash Cymbal 2> and the
-C<Splash Cymbal.>
-
-=head2 * ride()
-
-    $x = $d->ride;
-    $x = $d->ride(\@rides);
-
-Strike or set the "ride" patches.  By default, these are the
-C<Ride Bell>, C<Ride Cymbal 1> and the C<Ride Cymbal 2.>
-
-=head2 * tom()
-
-    $x = $d->tom;
-    $x = $d->tom(['Low Conga','Mute Hi Conga','Open Hi Conga']);
-
-Strike or set the "tom" patches.  By default, these are the
-C<High Tom>, C<Hi-Mid Tom>, etc.
-
-=head2 * kick()
-
-    $x = $d->kick;
-    $x = $d->kick('Bass Drum 1');
-
-Strike or set the "kick" patch.  By default, this is the
-C<Acoustic Bass Drum>.
-
-=head2 * tick()
-
-    $x = $d->tick;
-    $x = $d->tick('Mute Triangle');
-
-Strike or set the "tick" patch.  By default, this is the
-C<Closed Hi-Hat>.
-
-=head2 * kicktick()
-
-    $x = $d->kicktick;
-    $x = $d->kicktick(['Bass Drum 1','Mute Triangle']);
-
-Strike or set the "kicktick" patches.  By default, these are the
-predefined C<kick> and C<tick> patches.
-
-=head2 * snare()
-
-    $x = $d->snare;
-    $x = $d->snare('Electric Snare');
-
-Strike or set the "snare" patches.  By default, this is the
-C<Acoustic Snare.>
-
-=head2 * backbeat()
-
-    $x = $d->backbeat;
-    $x = $d->backbeat(['Bass Drum 1','Side Stick']);
-
-Strike or set the "backbeat" patches.  By default, these are the
-predefined C<kick> and C<snare> patches.
 
 =head2 * strike()
 
@@ -716,15 +643,6 @@ of known beats.
 
 If no argument is given, all the known patterns are returned.
 
-=head2 * kit()
-
-  $x = $d->kit;
-  $x = $d->kit('clank');
-  $x = $d->kit(clunk => ['Foo','Bar']);
-  $x = $d->kit(\%drumkit);
-
-Return or set part or all of the percussion set.
-
 =head2 * write()
 
   $x = $d->write;
@@ -734,6 +652,90 @@ This is just an alias for L<MIDI::Simple/write_score> but with
 unimaginably intelligent bits.  It returns the name of the written
 file if successful.  If no filename is given, we use the preset
 C<-file> attribute.
+
+=head1 Kit Access
+
+=head2 * kit()
+
+  $x = $d->kit;
+  $x = $d->kit('clank');
+  $x = $d->kit(clunk => ['Foo','Bar']);
+  $x = $d->kit(\%drumkit);
+
+Return or set part or all of the percussion set.
+
+=head2 * hhat()
+
+    $x = $d->hhat;
+    $x = $d->hhat(['Cabasa','Maracas','Claves']);
+
+Strike or set the "hhat" patches.  By default, these are the
+C<Closed Hi-Hat>, C<Open Hi-Hat> and the C<Pedal Hi-Hat.>
+
+=head2 * crash()
+
+    $x = $d->crash;
+    $x = $d->crash(\@crashes);
+
+Strike or set the "crash" patches.  By default, these are the
+C<Chinese Cymbal>, C<Crash Cymbal 1>, C<Crash Cymbal 2> and the
+C<Splash Cymbal.>
+
+=head2 * ride()
+
+    $x = $d->ride;
+    $x = $d->ride(\@rides);
+
+Strike or set the "ride" patches.  By default, these are the
+C<Ride Bell>, C<Ride Cymbal 1> and the C<Ride Cymbal 2.>
+
+=head2 * tom()
+
+    $x = $d->tom;
+    $x = $d->tom(['Low Conga','Mute Hi Conga','Open Hi Conga']);
+
+Strike or set the "tom" patches.  By default, these are the
+C<High Tom>, C<Hi-Mid Tom>, etc.
+
+=head2 * kick()
+
+    $x = $d->kick;
+    $x = $d->kick('Bass Drum 1');
+
+Strike or set the "kick" patch.  By default, this is the
+C<Acoustic Bass Drum>.
+
+=head2 * tick()
+
+    $x = $d->tick;
+    $x = $d->tick('Mute Triangle');
+
+Strike or set the "tick" patch.  By default, this is the
+C<Closed Hi-Hat>.
+
+=head2 * kicktick()
+
+    $x = $d->kicktick;
+    $x = $d->kicktick(['Bass Drum 1','Mute Triangle']);
+
+Strike or set the "kicktick" patches.  By default, these are the
+predefined C<kick> and C<tick> patches.
+
+=head2 * snare()
+
+    $x = $d->snare;
+    $x = $d->snare('Electric Snare');
+
+Strike or set the "snare" patches.  By default, this is the
+C<Acoustic Snare.>
+
+=head2 * backbeat()
+
+    $x = $d->backbeat;
+    $x = $d->backbeat(['Bass Drum 1','Side Stick']);
+
+Strike or set the "backbeat" patches.  By default, these are the
+predefined C<kick> and C<snare> patches.
 
 =head1 CONVENIENCE METHODS
 
