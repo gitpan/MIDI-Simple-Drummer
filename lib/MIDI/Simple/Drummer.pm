@@ -1,5 +1,5 @@
 package MIDI::Simple::Drummer;
-our $VERSION = '0.00_14';
+our $VERSION = '0.00_15';
 use strict;
 use warnings;
 use MIDI::Simple;
@@ -15,8 +15,8 @@ sub new {
         -channel => '9',
         -volume => '100',
         # The Goods[TM].
-        -patterns => undef,
-        -kit => undef,
+        -kit => _rock_kit(),
+        -patterns => _rock_patterns(),
         -file => 'Drummer.mid',
         -score => MIDI::Simple->new_score(),
         @_
@@ -28,18 +28,8 @@ sub new {
 
 sub _setup { # Where's my Roadies, Man?
     my $self = shift;
-    if($self->{-kit}) {
-        $self->kit($self->{-kit});
-    }
-    else {
-        $self->kit($self->_rock_kit);
-    }
-    if($self->{-patterns}) {
-        $self->pattern($self->{-patterns});
-    }
-    else {
-        $self->pattern($self->_rock_patterns);
-    }
+    $self->kit($self->{-kit}) if $self->{-kit};
+    $self->pattern($self->{-patterns}) if $self->{-patterns};
     $self->{-score}->set_tempo(int(60_000_000 / $self->{-bpm}));
     $self->{-score}->noop('c'.$self->{-channel}, 'V'.$self->{-volume});
 }
@@ -95,47 +85,47 @@ sub option_strike { # When in doubt, crash.
 
 sub snare { # Kit access.
     my $self = shift;
-    $self->kit(snare => shift) if @_;
+    $self->kit(snare => [@_]) if @_;
     return $self->option_strike(@{$self->kit('snare')});
 }
 sub kick {
     my $self = shift;
-    $self->kit(kick => shift) if @_;
+    $self->kit(kick => [@_]) if @_;
     return $self->option_strike(@{$self->kit('kick')});
 }
 sub tick {
     my $self = shift;
-    $self->kit(tick => shift) if @_;
+    $self->kit(tick => [@_]) if @_;
     return $self->option_strike(@{$self->kit('tick')});
 }
 sub kicktick {
     my $self = shift;
-    $self->kit(kicktick => shift) if @_;
+    $self->kit(kicktick => [@_]) if @_;
     return $self->strike(@{$self->kit('kicktick')});
 }
 sub backbeat {
     my $self = shift;
-    $self->kit(backbeat => shift) if @_;
+    $self->kit(backbeat => [@_]) if @_;
     return $self->strike(@{$self->kit('backbeat')});
 }
 sub hhat {
     my $self = shift;
-    $self->kit(hhat => shift) if @_;
+    $self->kit(hhat => [@_]) if @_;
     return $self->option_strike(@{$self->kit('hhat')});
 }
 sub crash {
     my $self = shift;
-    $self->kit(crash => shift) if @_;
+    $self->kit(crash => [@_]) if @_;
     return $self->option_strike(@{$self->kit('crash')});
 }
 sub ride {
     my $self = shift;
-    $self->kit(ride => shift) if @_;
+    $self->kit(ride => [@_]) if @_;
     return $self->option_strike(@{$self->kit('ride')});
 }
 sub tom {
     my $self = shift;
-    $self->kit(tom => shift) if @_;
+    $self->kit(tom => [@_]) if @_;
     return $self->option_strike(@{$self->kit('tom')});
 }
 
@@ -151,9 +141,9 @@ sub rotate_backbeat { # Rotate the backbeat, tick and post-fill option strike.
     my %args = (
         -beat => 1,
         -fill => 0,
-        -backbeat => $self->kit('backbeat'),
-        -tick => $self->kit('tick'),
-        -options => $self->kit('crash'),
+        -backbeat => scalar $self->kit('backbeat'),
+        -tick => scalar $self->kit('tick'),
+        -options => scalar $self->kit('crash'),
         @_
     );
     my $c = $args{-beat} == 1 && $args{-fill}
@@ -174,53 +164,43 @@ sub metronome {
     return $self->count_in($self->{-phrases}, shift || 'Pedal Hi-Hat');
 }
 
-sub pattern { # Beats and fills and random flailing, etc.
+sub _setting {
     my $self = shift;
-    # Return all known patterns if no arguments are given.
-    return $self->{-patterns} unless @_;
-    # Are we given a set of patterns to save?
-    if(ref $_[0] eq 'HASH') {
-        my $p = $_[0];
-        while(my($k, $v) = each %$p) {
-            $self->{-patterns}{$k} = $v;
-        }
-        return $self->{-patterns};
+    my $type = '-' . shift || return;
+    if(!@_) {
+        # Return all known types if no arguments.
+        return $self->{$type};
     }
-    else {
-        my $n = shift;
-        # Do we want to save a pattern?
-        my $v = shift;
-        # Are we a particular type (like a fill)?
-        my $type = @_ ? ' '. shift : '';
-        $n .= $type;
-        # Shovel it onto the pile.
-        $self->{-patterns}{$n} = $v if $v && ref $v eq 'CODE';
-        # Hand back the named pattern.
-        return wantarray ? ($n => $self->{-patterns}{$n}) : $self->{-patterns}{$n};
+    elsif(@_ == 1) {
+        # Return the named type.
+        my $p = shift;
+        return wantarray
+            ? ($p => $self->{$type}{$p})
+            :        $self->{$type}{$p};
+    }
+    elsif(@_ > 1) {
+        # Add new type(s) to our collection.
+        my %args = @_;
+        my @p = ();
+        while(my($p, $v) = each %args) {
+            $self->{$type}{$p} = $v;
+            push @p, $p;
+        }
+        # Return the named type(s).
+        return wantarray
+            ? (map { $_ => $self->{$type}{$_} } @p) # Hash of named types.
+            : @p > 1
+                ? [map { $self->{$type}{$_} } @p]   # Arrayref of types.
+                : $self->{$type}{$p[0]};            # Single type.
     }
 }
-
-sub kit {
+sub pattern { # Coderefs of patterns.
     my $self = shift;
-    # Return the drumkit if no arguments are given.
-    return $self->{-kit} unless @_;
-    # Are we given a set of patches to save?
-    if(ref $_[0] eq 'HASH') {
-        my $kit = $_[0];
-        while(my($k, $v) = each %$kit) {
-            $self->{-kit}{$k} = $v;
-        }
-        return $self->{-kit};
-    }
-    else {
-        my $n = shift;
-        # Do we want to save a patch?
-        my $v = shift;
-        # Shovel it on.
-        $self->{-kit}{$n} = $v if $v && ref $v eq 'ARRAY';
-        # Hand back the patch(es).
-        return $self->{-kit}{$n};
-    }
+    return $self->_setting('patterns', @_);
+}
+sub kit { # Arrayrefs of patches.
+    my $self = shift;
+    return $self->_setting('kit', @_);
 }
 
 sub beat { # Pattern selector method.
@@ -229,18 +209,19 @@ sub beat { # Pattern selector method.
         -name => 0,
         -fill => 0,
         -last => 0,
-        -pattern => undef,
         -type => '',
         @_
     );
-
-    my $n = $args{-name} && $args{-type}
-        ? "$args{-name} $args{-type}" : $args{-name};
 
     # Get the names of the known patterns.
     my @k = keys %{$self->{-patterns}};
     # Bail out if there are no patterns defined.
     return undef unless @k;
+
+    # Do we want a certain type that isn't already in the given name?
+    my $n = $args{-name} && $args{-type} && $args{-name} !~ /^.+\s+$args{-type}$/
+        ? "$args{-name} $args{-type}" : $args{-name};
+
     # Return the only pattern if there is only one.
     if(@k == 1) {
         $n = $k[0];
@@ -248,9 +229,11 @@ sub beat { # Pattern selector method.
     else {
         # Otherwise choose a different pattern.
         while($n eq 0 || $n eq $args{-last}) {
+            # TODO Allow custom method of "randomization?"
             $n = $k[int(rand @k)];
             if($args{-type}) {
-                (my $t = $n) =~ s/^.+\s+(\w+)$/$1/;
+                (my $t = $n) =~ s/^.+\s+($args{-type})$/$1/;
+                # Skip if this is not a type for which we are looking.
                 $n = 0 unless $t eq $args{-type};
             }
         }
@@ -268,6 +251,7 @@ sub fill {
 sub write { # You gotta get it out there, you know. Make some buzz, Man.
     my $self = shift;
     my $file = shift || $self->{-file};
+    $file =~ s/^([\w .])$/$1/;
     $self->{-score}->write_score($file);
     return -e $self->{-file} ? $file : 0;
 }
@@ -298,10 +282,10 @@ sub _rock_kit {
             'High Floor Tom', # 43
             'Low Floor Tom', # 41
         ],
-        kick => ['Acoustic Bass Drum'], # 35
-        tick => ['Closed Hi-Hat'], # 42
+        kick     => ['Acoustic Bass Drum'], # 35
+        tick     => ['Closed Hi-Hat'], # 42
         kicktick => ['Acoustic Bass Drum', 'Closed Hi-Hat'],
-        snare => ['Acoustic Snare'], # 38
+        snare    => ['Acoustic Snare'], # 38
         backbeat => ['Acoustic Snare', 'Acoustic Bass Drum'],
     };
 }
@@ -463,9 +447,10 @@ L<MIDI::Simple> details.  It is B<not> a "drum machine", that you have
 to "program" with some arcane specification syntax.  Rather, it will
 evolve into a sufficiently intelligent drummer, that you can jam with.
 
-Note that B<you>, the user, should know what the patterns are named
-and what they do.  For this, see the L<MIDI::Simple::Drummer/pattern>
-method.
+Note that B<you>, the user, should know what the patterns and kit
+elements are named and what they do.  For these, see the
+L<MIDI::Simple::Drummer/pattern> and L<MIDI::Simple::Drummer/kit>
+methods.
 
 Since we are talking about patterns (A.K.A. beats and fills), this is
 entirely perl logic based, so you could use a Markov chain, stochastic
@@ -480,22 +465,22 @@ techniques or a L<Parse::RecDescent> grammar, even.
 Far away in a distant galaxy... But nevermind that, Luke. Use The
 Source.
 
-Currently, the accepted attributes are:
+Currently, the accepted => default attributes are:
 
-  # Rhythm metrics:
-  -bpm      => 120,
-  -phrases  => 4,
-  -beats    => 4,
-  # MIDI settings:
-  -channel  => '9',
-  -volume   => '100',
-  # The Goods[TM]:
-  -patterns => undef,
-  -kit      => undef,
-  -file     => 'Drummer.mid',
-  -score    => MIDI::Simple->new_score,
+  # Rhythm metrics.
+  -bpm => 120,
+  -phrases => 4,
+  -beats => 4,
+  # MIDI settings.
+  -channel => '9',
+  -volume => '100',
+  # The Goods[TM].
+  -kit => _rock_kit(),
+  -patterns => _rock_patterns(),
+  -file => 'Drummer.mid',
+  -score => MIDI::Simple->new_score(),
 
-These can all be overridden by supplying them to the constuctor.
+These can all be overridden with the constuctor or accessors.
 
 =head2 * phrases()
 
@@ -628,20 +613,11 @@ C<-type =E<gt> 'fill'> added.
 =head2 * pattern()
 
   $x = $d->pattern;
-  $x = $d->pattern('foo');
-  $x = $d->pattern(bar => \&bar);
-  $x = $d->pattern('paraflamaramadiddle', \&code, 'fill');
-  $x = $d->pattern(\%patterns);
+  $x = $d->pattern('rock 1');
+  @x = $d->pattern(paraflamaramadiddle => \&code, 'foo fill' => \&bar);
 
-Return the code reference to the named pattern(s).  If a second,
-coderef argument is provided, the named pattern is assigned to it.
-A third named argument can be supplied so that a type can be set or
-selected.  C<-type =E<gt> 'fill'> to select a named fill.
-
-If the argument is a single hash reference, each is added to the set
-of known beats.
-
-If no argument is given, all the known patterns are returned.
+Return or set the code reference(s) to the named pattern(s).  If no
+argument is given, all the known patterns are returned.
 
 =head2 * write()
 
@@ -658,9 +634,10 @@ C<-file> attribute.
 =head2 * kit()
 
   $x = $d->kit;
-  $x = $d->kit('clank');
-  $x = $d->kit(clunk => ['Foo','Bar']);
-  $x = $d->kit(\%drumkit);
+  $x = $d->kit('snare');
+  @x = $d->kit( clapsnare => ['Handclap','Electric Snare'],
+                kickstick => ['Bass Drum 1','Side Stick']);
+  @x = $d->kit('clapsnare');
 
 Return or set part or all of the percussion set.
 

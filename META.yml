@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:               MIDI-Simple-Drummer
-version:            0.00_14
+version:            0.00_15
 abstract:           Glorified Metronome
 author:
     - Gene Boggs <gene@cpan.org>

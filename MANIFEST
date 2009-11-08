@@ -1,6 +1,7 @@
 Changes
 eg/basics
 eg/drummer
+eg/light
 lib/MIDI/Simple/Drummer.pm
 MANIFEST			This list of files
 README

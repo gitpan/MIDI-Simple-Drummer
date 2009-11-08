@@ -10,4 +10,5 @@ for(1 .. $d->phrases * $d->beats) {
     $d->note($d->EIGHTH, $d->rotate_backbeat(-beat => $_));
     $d->note($d->EIGHTH, $d->tick);
 }
+$d->note($d->EIGHTH, $d->kicktick);
 $d->write("$0.mid");

@@ -1,7 +1,7 @@
 #!perl -T
 use strict;
 use warnings;
-use Test::More tests => 65;
+use Test::More tests => 64;
 
 BEGIN { use_ok('MIDI::Simple::Drummer') }
 
@@ -35,36 +35,10 @@ is $d->QUARTER, 'qn', 'QUARTER';
 is $d->EIGHTH, 'en', 'EIGHTH';
 is $d->SIXTEENTH, 'sn', 'SIXTEENTH';
 
-$d = eval { MIDI::Simple::Drummer->new };
-$d->metronome;
-$x = grep { $_->[0] eq 'note' } @{$d->score->{Score}};
-ok $x == $d->beats * $d->phrases, 'metronome';
-
-$d = eval { MIDI::Simple::Drummer->new };
-$d->count_in;
-$x = grep { $_->[0] eq 'note' } @{$d->score->{Score}};
-ok $x == $d->beats, 'count_in';
-
-$x = $d->strike;
-is $x, 'n38', 'strike default';
-$x = $d->strike('Cowbell');
-is $x, 'n56', 'strike patch';
-$x = $d->strike('Cowbell', 'Tambourine');
-is $x, 'n56,n54', 'strike patches string';
-$x = [$d->strike('Cowbell', 'Tambourine')];
-is_deeply $x, ['n56', 'n54'], 'strike patches list';
-
-$x = $d->option_strike;
-like $x, qr/n(?:5[257]|49)/, 'option_strike default';
-$x = $d->option_strike('Cowbell');
-is $x, 'n56', 'option_strike patch';
-$x = $d->option_strike('Cowbell', 'Tambourine');
-like $x, qr/n5[46]/, 'option_strike options';
-
 $x = $d->kit;
-ok ref $x eq 'HASH', 'kit';
+isa_ok $x, 'HASH';
 $x = $d->kit('clank');
-is $x, undef, 'kit undef clank';
+is $x, undef, 'kit clank undef';
 $x = $d->kit(clunk => ['Foo','Bar']);
 is_deeply $x, ['Foo','Bar'], 'kit set clunk';
 
@@ -86,6 +60,32 @@ $x = $d->ride;
 like $x, qr/n5[139]/, 'ride';
 $x = $d->tom;
 like $x, qr/n(?:4[13578]|50)/, 'tom';
+
+$x = $d->strike;
+is $x, 'n38', 'strike default';
+$x = $d->strike('Cowbell');
+is $x, 'n56', 'strike patch';
+$x = $d->strike('Cowbell', 'Tambourine');
+is $x, 'n56,n54', 'strike patches string';
+$x = [$d->strike('Cowbell', 'Tambourine')];
+is_deeply $x, ['n56', 'n54'], 'strike patches list';
+
+$x = $d->option_strike;
+like $x, qr/n(?:5[257]|49)/, 'option_strike default';
+$x = $d->option_strike('Cowbell');
+is $x, 'n56', 'option_strike patch';
+$x = $d->option_strike('Cowbell', 'Tambourine');
+like $x, qr/n5[46]/, 'option_strike options';
+
+$d = eval { MIDI::Simple::Drummer->new };
+$d->metronome;
+$x = grep { $_->[0] eq 'note' } @{$d->score->{Score}};
+ok $x == $d->beats * $d->phrases, 'metronome';
+
+$d = eval { MIDI::Simple::Drummer->new };
+$d->count_in;
+$x = grep { $_->[0] eq 'note' } @{$d->score->{Score}};
+ok $x == $d->beats, 'count_in';
 
 $x = $d->rotate;
 is $x, 'n35', 'rotate';
@@ -121,31 +121,30 @@ is $x, 'n35,n42', 'rotate_backbeat 3 fill';
 
 $x = $d->pattern(1);
 is $x, undef, 'get pattern undef';
-my $z = sub { $d->note($d->EIGHTH, $d->strike) };
-$x = $d->pattern('foo', $z);
-ok ref($x) eq 'CODE', 'set pattern';
-is_deeply $x, $z, 'pattern is a coderef';
-$x = [$d->pattern('foo', $z, 'fill')];
-is_deeply ['foo fill' => $z], $x, 'set fill pattern';
+my $y = sub { $d->note($d->EIGHTH, $d->strike) };
+$x = $d->pattern('foo', $y);
+is_deeply $x, $y, 'get pattern';
+$x = $d->pattern('foo fill', $y);
+is_deeply $x, $y, 'set fill pattern';
 
 $x = $d->beat;
-ok $x, 'beat';
+ok $x, 'random beat';
+$x = $d->fill;
+ok $x, 'random fill';
+$x = $d->beat(-name => 'foo');
+is $x, 'foo', 'named beat';
 $x = $d->beat(-type => 'fill');
 like $x, qr/ fill$/, 'type';
-$x = $d->beat(-name => 'foo');
-is $x, 'foo', 'named';
 $x = $d->beat(-name => 'foo', -type => 'fill');
-is $x, 'foo fill', 'named type';
+is $x, 'foo fill', 'named fill';
 $x = $d->beat(-last => 1);
-ok $x ne 1, 'last unknown';
+ok $x ne 1, 'last unknown beat';
 $x = $d->beat(-last => 'foo');
-ok $x ne 'foo', 'last known';
+ok $x ne 'foo', 'last known beat';
 $x = $d->beat(-last => 'foo fill');
-is $x, 'foo', 'last known fill';
-$x = $d->fill;
-ok $x, 'fill';
+isnt $x, 'foo fill', 'last known fill';
 
 $x = $d->write;
-ok $x, 'write';
-$x = $d->write('Buddy-Rich.mid');
+is $x, 'Drummer.mid', 'write';
+$x = $d->write("Buddy-Rich.mid");
 ok $x, 'named write';
