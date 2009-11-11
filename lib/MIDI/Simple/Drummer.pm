@@ -1,5 +1,5 @@
 package MIDI::Simple::Drummer;
-our $VERSION = '0.00_15';
+our $VERSION = '0.00_16';
 use strict;
 use warnings;
 use MIDI::Simple;
@@ -83,51 +83,24 @@ sub option_strike { # When in doubt, crash.
     return $self->strike($patches[rand(@patches)]);
 }
 
-sub snare { # Kit access.
+sub _set_get { # Kit access.
     my $self = shift;
-    $self->kit(snare => [@_]) if @_;
-    return $self->option_strike(@{$self->kit('snare')});
+    my $key = shift || return;
+    my $option = shift || 0;
+    $self->kit($key => [@_]) if @_;
+    return $option
+        ? $self->option_strike(@{$self->kit($key)})
+        : $self->strike(@{$self->kit($key)});
 }
-sub kick {
-    my $self = shift;
-    $self->kit(kick => [@_]) if @_;
-    return $self->option_strike(@{$self->kit('kick')});
-}
-sub tick {
-    my $self = shift;
-    $self->kit(tick => [@_]) if @_;
-    return $self->option_strike(@{$self->kit('tick')});
-}
-sub kicktick {
-    my $self = shift;
-    $self->kit(kicktick => [@_]) if @_;
-    return $self->strike(@{$self->kit('kicktick')});
-}
-sub backbeat {
-    my $self = shift;
-    $self->kit(backbeat => [@_]) if @_;
-    return $self->strike(@{$self->kit('backbeat')});
-}
-sub hhat {
-    my $self = shift;
-    $self->kit(hhat => [@_]) if @_;
-    return $self->option_strike(@{$self->kit('hhat')});
-}
-sub crash {
-    my $self = shift;
-    $self->kit(crash => [@_]) if @_;
-    return $self->option_strike(@{$self->kit('crash')});
-}
-sub ride {
-    my $self = shift;
-    $self->kit(ride => [@_]) if @_;
-    return $self->option_strike(@{$self->kit('ride')});
-}
-sub tom {
-    my $self = shift;
-    $self->kit(tom => [@_]) if @_;
-    return $self->option_strike(@{$self->kit('tom')});
-}
+sub snare    { return shift->_set_get(snare => 1, @_) }
+sub kick     { return shift->_set_get(kick => 1, @_) }
+sub tick     { return shift->_set_get(tick => 1, @_) }
+sub kicktick { return shift->_set_get(kicktick => 0, @_) }
+sub backbeat { return shift->_set_get(backbeat => 0, @_) }
+sub hhat     { return shift->_set_get(hhat => 1, @_) }
+sub crash    { return shift->_set_get(crash => 1, @_) }
+sub ride     { return shift->_set_get(ride => 1, @_) }
+sub tom      { return shift->_set_get(tom => 1, @_) }
 
 sub rotate { # Rotate through a list of patches. Default backbeat.
     my $self = shift;
@@ -293,23 +266,24 @@ sub _rock_kit {
 sub _rock_patterns {
     my $self = shift;
     return {
-        # Beats.
-        rock_1 => sub { # Quater-note rock beat: qn cym. qn k on 1 & 3. qn s on 2 & 4.
+        # Beats:
+        rock_1 => sub {
+            # Quater-note beat: Qn tick. Cym on 1. Kick on 1&3. Snare on 2&4.
             my $self = shift;
-            my %args = @_;
-            my $options = [
-                'Closed Hi-Hat',
-                'Ride Bell',
-                'Ride Cymbal 2',
-#                'Tambourine', # Maybe...
-#                'Cowbell', # Maybe not.
-            ];
+            my %args = (
+                -options => [
+                    'Closed Hi-Hat',
+                    'Ride Bell',
+                    'Ride Cymbal 2',
+#                    'Tambourine', # Maybe...
+#                    'Cowbell', # Maybe not.
+                ],
+                @_
+            );
             for my $beat (1 .. $self->{-beats}) {
-                my $n = $self->rotate($beat, $args{-rotate});
-                $self->note(
-                    QUARTER(),
-                    $self->option_strike(%args, -options => $options),
-                    $n
+                $self->note(QUARTER(),
+                    $self->rotate($beat, $args{-rotate}),
+                    $self->option_strike(@{$args{options}})
                 );
             }
         },
@@ -321,46 +295,31 @@ sub _rock_patterns {
                 $self->note(EIGHTH(), $self->tick);
             }
         },
-        rock_3 => sub { # Main rock beat: en c-hh. qn k1,3,3&. qn s2,4.
+        rock_3 => sub { # Main beat: en c-hh. qn k1,3,3&. qn s2,4.
             my $self = shift;
             my %args = @_;
             for my $beat (1 .. $self->{-beats}) {
                 $self->note(EIGHTH(), $self->rotate_backbeat(%args, -beat => $beat));
-                if($beat == 3) {
-                    $self->note(EIGHTH(), $self->kicktick);
-                }
-                else {
-                    $self->note(EIGHTH(), $self->tick);
-                }
+                $self->note(EIGHTH(), ($beat == 3 ? $self->kicktick : $self->tick));
             }
         },
-        rock_4 => sub { # Syncopated rock beat 1: en c-hh. qn k1,3,4&. qn s2,4.
+        rock_4 => sub { # Syncopated beat 1: en c-hh. qn k1,3,4&. qn s2,4.
             my $self = shift;
             my %args = @_;
             for my $beat (1 .. $self->{-beats}) {
                 $self->note(EIGHTH(), $self->rotate_backbeat(%args, -beat => $beat));
-                if($beat == 4) {
-                    $self->note(EIGHTH(), $self->kicktick);
-                }
-                else {
-                    $self->note(EIGHTH(), $self->tick);
-                }
+                $self->note(EIGHTH(), ($beat == 4 ? $self->kicktick : $self->tick));
             }
         },
-        rock_5 => sub { # Syncopated rock beat 2: en c-hh. qn k1,3,3&,4&. qn s2,4.
+        rock_5 => sub { # Syncopated beat 2: en c-hh. qn k1,3,3&,4&. qn s2,4.
             my $self = shift;
             my %args = @_;
             for my $beat (1 .. $self->{-beats}) {
                 $self->note(EIGHTH(), $self->rotate_backbeat(%args, -beat => $beat));
-                if($beat == 3 || $beat == 4) {
-                    $self->note(EIGHTH(), $self->kicktick);
-                }
-                else {
-                    $self->note(EIGHTH(), $self->tick);
-                }
+                $self->note(EIGHTH(), ($beat == 3 || $beat == 4 ? $self->kicktick : $self->tick));
             }
         },
-        # Fills.
+        # Fills:
         'snare_1 fill' => sub {
             my $self = shift;
             $self->note(QUARTER(), $self->snare) for 0 .. 1;
@@ -644,7 +603,7 @@ Return or set part or all of the percussion set.
 =head2 * hhat()
 
     $x = $d->hhat;
-    $x = $d->hhat(['Cabasa','Maracas','Claves']);
+    $x = $d->hhat('Cabasa','Maracas','Claves');
 
 Strike or set the "hhat" patches.  By default, these are the
 C<Closed Hi-Hat>, C<Open Hi-Hat> and the C<Pedal Hi-Hat.>
@@ -652,7 +611,7 @@ C<Closed Hi-Hat>, C<Open Hi-Hat> and the C<Pedal Hi-Hat.>
 =head2 * crash()
 
     $x = $d->crash;
-    $x = $d->crash(\@crashes);
+    $x = $d->crash(@crashes);
 
 Strike or set the "crash" patches.  By default, these are the
 C<Chinese Cymbal>, C<Crash Cymbal 1>, C<Crash Cymbal 2> and the
@@ -661,7 +620,7 @@ C<Splash Cymbal.>
 =head2 * ride()
 
     $x = $d->ride;
-    $x = $d->ride(\@rides);
+    $x = $d->ride(@rides);
 
 Strike or set the "ride" patches.  By default, these are the
 C<Ride Bell>, C<Ride Cymbal 1> and the C<Ride Cymbal 2.>
@@ -669,7 +628,7 @@ C<Ride Bell>, C<Ride Cymbal 1> and the C<Ride Cymbal 2.>
 =head2 * tom()
 
     $x = $d->tom;
-    $x = $d->tom(['Low Conga','Mute Hi Conga','Open Hi Conga']);
+    $x = $d->tom('Low Conga','Mute Hi Conga','Open Hi Conga');
 
 Strike or set the "tom" patches.  By default, these are the
 C<High Tom>, C<Hi-Mid Tom>, etc.
@@ -693,7 +652,7 @@ C<Closed Hi-Hat>.
 =head2 * kicktick()
 
     $x = $d->kicktick;
-    $x = $d->kicktick(['Bass Drum 1','Mute Triangle']);
+    $x = $d->kicktick('Bass Drum 1','Mute Triangle');
 
 Strike or set the "kicktick" patches.  By default, these are the
 predefined C<kick> and C<tick> patches.
@@ -709,7 +668,7 @@ C<Acoustic Snare.>
 =head2 * backbeat()
 
     $x = $d->backbeat;
-    $x = $d->backbeat(['Bass Drum 1','Side Stick']);
+    $x = $d->backbeat('Bass Drum 1','Side Stick');
 
 Strike or set the "backbeat" patches.  By default, these are the
 predefined C<kick> and C<snare> patches.

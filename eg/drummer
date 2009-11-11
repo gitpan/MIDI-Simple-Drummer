@@ -3,6 +3,7 @@ use strict;
 use warnings;
 
 use MIDI::Simple::Drummer;
+
 my $d = MIDI::Simple::Drummer->new(
     -bpm     => shift || 111,
     -volume  => shift || 121,
@@ -17,14 +18,18 @@ $d->count_in;
 for my $p (1 .. $d->phrases) {
     if($p % 2 > 0) {
         $beat = $d->beat(-name => 'rock_3', -fill => $fill);
+        $beat = $d->beat(-name => 'rock_3');
     }
     else {
         $beat = $d->beat(-name => 'rock_4');
         $fill = $d->fill(-last => $fill);
     }
 }
-$d->pattern('end fill' => \&fin);
-$d->fill(-name => 'end');
+$d->note($d->EIGHTH, $d->kick);
+$d->note($d->EIGHTH, $d->kick);
+$d->note($d->EIGHTH, $d->crash);
+#$d->pattern('end fill' => \&fin);
+#$d->fill(-name => 'end');
 #fin($d); # Perfectly reasonable but not as sexy.
 
 $d->write;
