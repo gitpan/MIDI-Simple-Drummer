@@ -1,5 +1,10 @@
 Revision history for MIDI-Simple-Drummer
 
+0.00_17 Sat Nov 14, 2009
+    - Added bpm, volume and accent accessors and an accent method.
+    - Spruced-up POD.
+    - Added a beat() method TODO test.
+
 0.00_16 Tue Nov 10, 2009
     - Fixed an option_strike() beat call that fubar'd the testing.
     - Fixed mistaken method example syntax in POD.

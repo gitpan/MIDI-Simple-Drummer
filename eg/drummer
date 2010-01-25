@@ -25,23 +25,23 @@ for my $p (1 .. $d->phrases) {
         $fill = $d->fill(-last => $fill);
     }
 }
-$d->note($d->EIGHTH, $d->kick);
-$d->note($d->EIGHTH, $d->kick);
-$d->note($d->EIGHTH, $d->crash);
-#$d->pattern('end fill' => \&fin);
-#$d->fill(-name => 'end');
+$d->pattern('end fill' => \&fin);
+$d->fill(-name => 'end');
 #fin($d); # Perfectly reasonable but not as sexy.
 
 $d->write;
 
 sub fin {
     my $d = shift;
-    $d->note($d->EIGHTH, $d->option_strike);
-    $d->note($d->EIGHTH, $d->kick) for 1 .. 2;
-    $d->note($d->EIGHTH, $d->strike('Splash Cymbal', 'Bass Drum 1'));
-    $d->note($d->SIXTEENTH, $d->snare) for 0 .. 2;
-    $d->rest($d->SIXTEENTH);
-    $d->note($d->EIGHTH, $d->strike('Splash Cymbal', 'Bass Drum 1'));
-    $d->note($d->SIXTEENTH, $d->snare) for 0 .. 2;
-    $d->note($d->EIGHTH, $d->strike('Crash Cymbal 1', 'Bass Drum 1'));
+    $d->note($d->EIGHTH, $d->kick);
+    $d->note($d->EIGHTH, $d->kick);
+    $d->note($d->EIGHTH, $d->crash);
+#    $d->note($d->EIGHTH, $d->option_strike);
+#    $d->note($d->EIGHTH, $d->kick) for 1 .. 2;
+#    $d->note($d->EIGHTH, $d->strike('Splash Cymbal', 'Bass Drum 1'));
+#    $d->note($d->SIXTEENTH, $d->snare) for 0 .. 2;
+#    $d->rest($d->SIXTEENTH);
+#    $d->note($d->EIGHTH, $d->strike('Splash Cymbal', 'Bass Drum 1'));
+#    $d->note($d->SIXTEENTH, $d->snare) for 0 .. 2;
+#    $d->note($d->EIGHTH, $d->strike('Crash Cymbal 1', 'Bass Drum 1'));
 }
