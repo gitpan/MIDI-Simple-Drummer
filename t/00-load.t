@@ -1,6 +1,9 @@
 #!perl -T
 use strict;
 use warnings;
-use Test::More tests => 1;
+use Test::More tests => 2;
 BEGIN { use_ok( 'MIDI::Simple::Drummer' ) }
-diag( "Testing MIDI::Simple::Drummer $MIDI::Simple::Drummer::VERSION, Perl $], $^X" );
+BEGIN { use_ok( 'MIDI::Simple::Drummer::Rock' ) }
+diag(
+"Testing Drummer $MIDI::Simple::Drummer::VERSION and Rock $MIDI::Simple::Drummer::Rock::VERSION, Perl $], $^X"
+);

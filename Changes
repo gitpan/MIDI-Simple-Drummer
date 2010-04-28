@@ -1,5 +1,9 @@
 Revision history for MIDI-Simple-Drummer
 
+0.00_18 Wed 2010.04.28
+    - Factored-out kits and patterns.
+    - Perceived the ugliness that I hacked-up... Must fix ASAP.
+
 0.00_17 Sat Nov 14, 2009
     - Added bpm, volume and accent accessors and an accent method.
     - Spruced-up POD.

@@ -4,19 +4,18 @@ INSTALLATION
 
 Using CPAN:
 
-  cpan MIDI::Simple::Drummer  # Shazaam!
+  sudo cpan MIDI::Simple::Drummer  # Shazaam!
 
-Do it by hand:
+Do it by hand (and get the eg/ directory):
 
-  0: Make sure Perl MIDI is installed.
-  1: Download the current MIDI-Simple-Drummer distribution.
-  2: Issue the following shell commands.
-    tar zxvf MIDI-Simple-Drummer-XX.YY_ZZ.tar.gz
-    cd MIDI-Simple-Drummer-XX.YY_ZZ
-    perl Makefile.PL
-    make
-    make test
-    make install
+  wget http://search.cpan.org/CPAN/authors/id/G/GE/GENE/MIDI-Simple-Drummer-X.Y_Z.tar.gz
+  tar zxvf MIDI-Simple-Drummer-X.Y_Z.tar.gz
+  cd MIDI-Simple-Drummer-X.Y_Z
+  perl Makefile.PL
+  make
+  make test
+  sudo make install
+  ls eg/ # Example usage
 
 SUPPORT AND DOCUMENTATION
 
@@ -40,7 +39,7 @@ You can also look for information at:
 
 COPYRIGHT AND LICENCE
 
-Copyright (C) 2009 Gene Boggs
+Copyright (C) 2010 Gene Boggs
 
 This program is free software; you can redistribute it and/or modify it
 under the terms of either: the GNU General Public License as published

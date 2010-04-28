@@ -1,7 +1,7 @@
 #!perl -T
 use strict;
 use warnings;
-use Test::More tests => 67;
+use Test::More tests => 76;
 
 BEGIN { use_ok('MIDI::Simple::Drummer') }
 
@@ -9,15 +9,23 @@ my $d = eval { MIDI::Simple::Drummer->new };
 isa_ok $d, 'MIDI::Simple::Drummer';
 ok !$@, 'created with no arguments';
 
-my $x = $d->phrases;
-is $x, 4, 'get default phrases';
-$x = $d->phrases(2);
-is $x, 2, 'set phrases';
+is $d->WHOLE, 'wn', 'WHOLE';
+is $d->HALF, 'hn', 'HALF';
+is $d->QUARTER, 'qn', 'QUARTER';
+is $d->EIGHTH, 'en', 'EIGHTH';
+is $d->SIXTEENTH, 'sn', 'SIXTEENTH';
+TODO: { local $TODO = 'not yet implemented';
+my $x = eval { $d->THIRTYSECOND };
+is $x, 'ts', 'THIRTYSECOND';
+$x = eval { $d->SIXTYFOURTH };
+is $x, 'sf', 'SIXTYFOURTH';
+}
 
-$x = $d->beats;
-is $x, 4, 'get default beats';
-$x = $d->beats(2);
-is $x, 2, 'set beats';
+my $x = $d->channel;
+is $x, 9, 'get default channel';
+$x = $d->channel(2);
+is $x, 2, 'set channel';
+$d->channel(9); # Ok enough of that.
 
 $x = $d->bpm;
 is $x, 120, 'get default bpm';
@@ -29,19 +37,34 @@ is $x, 100, 'get default volume';
 $x = $d->volume(101);
 is $x, 101, 'set volume';
 
-$x = $d->accent;
-is $x, 127, 'get default accent';
-$x = $d->accent(20);
-is $x, 121, 'set accent';
+$x = $d->phrases;
+is $x, 4, 'get default phrases';
+$x = $d->phrases(2);
+is $x, 2, 'set phrases';
+
+$x = $d->beats;
+is $x, 4, 'get default beats';
+$x = $d->beats(2);
+is $x, 2, 'set beats';
+
+$x = $d->style;
+is $x, 'Rock', 'get default style';
+$x = $d->style('Salsa');
+is $x, 'Salsa', 'set style';
+$d->style('Rock'); # Ok enough of that too.
+
+$x = $d->file;
+is $x, 'Drummer.mid', 'get default file';
+$x = $d->file('Buddy-Rich.mid');
+is $x, 'Buddy-Rich.mid', 'set file';
 
 $x = $d->score;
 isa_ok $x, 'MIDI::Simple', 'score';
 
-is $d->WHOLE, 'wn', 'WHOLE';
-is $d->HALF, 'hn', 'HALF';
-is $d->QUARTER, 'qn', 'QUARTER';
-is $d->EIGHTH, 'en', 'EIGHTH';
-is $d->SIXTEENTH, 'sn', 'SIXTEENTH';
+$x = $d->accent;
+is $x, 127, 'get default accent';
+$x = $d->accent(20);
+is $x, 121, 'set accent';
 
 $x = $d->kit;
 isa_ok $x, 'HASH';
@@ -125,35 +148,34 @@ is $x, 'n38,n42', 'rotate_backbeat 2 fill';
 $x = $d->rotate_backbeat(-beat => 3, -fill => 1);
 is $x, 'n35,n42', 'rotate_backbeat 3 fill';
 
-$x = $d->pattern(1);
-is $x, undef, 'get pattern undef';
+$x = $d->patterns(1);
+is $x, undef, 'get unknown pattern is undef';
 my $y = sub { $d->note($d->EIGHTH, $d->strike) };
-$x = $d->pattern('foo', $y);
-is_deeply $x, $y, 'get pattern';
-$x = $d->pattern('foo fill', $y);
-is_deeply $x, $y, 'set fill pattern';
+$x = $d->patterns('y', $y);
+is_deeply $x, $y, 'set y pattern';
+$x = $d->patterns('y fill', $y);
+is_deeply $x, $y, 'set y fill pattern';
 
-TODO: {
-    local $TODO = 'beat() sometimes fails :(';
 $x = eval { $d->beat };
 ok $x, 'random beat';
 $x = eval { $d->fill };
 ok $x, 'random fill';
-$x = eval { $d->beat(-name => 'foo') };
-is $x, 'foo', 'named beat';
+$x = eval { $d->beat(-name => 'rock_1') };
+is $x, 'rock_1', 'named rock_1 beat';
+$x = eval { $d->beat(-name => 'y') };
+is $x, 'y', 'named y beat';
 $x = eval { $d->beat(-type => 'fill') };
 like $x, qr/ fill$/, 'type';
-$x = eval { $d->beat(-name => 'foo', -type => 'fill') };
-is $x, 'foo fill', 'named fill';
+$x = eval { $d->beat(-name => 'y', -type => 'fill') };
+is $x, 'y fill', 'named fill';
 $x = eval { $d->beat(-last => 1) };
 ok $x ne 1, 'last unknown beat';
-$x = eval { $d->beat(-last => 'foo') };
-ok $x ne 'foo', 'last known beat';
-$x = eval { $d->beat(-last => 'foo fill') };
-isnt $x, 'foo fill', 'last known fill';
-}
+$x = eval { $d->beat(-last => 'y') };
+ok $x ne 'y', 'last known beat';
+$x = eval { $d->beat(-last => 'y fill') };
+isnt $x, 'y fill', 'last known fill';
 
 $x = $d->write;
-is $x, 'Drummer.mid', 'write';
-$x = $d->write("Buddy-Rich.mid");
-ok $x, 'named write';
+ok $x eq 'Drummer.mid' && -e $x, 'write';
+$x = $d->write('Gene-Krupa.mid');
+ok $x eq 'Gene-Krupa.mid' && -e $x, 'named write';
