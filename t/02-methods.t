@@ -1,12 +1,12 @@
 #!perl -T
 use strict;
 use warnings;
-use Test::More tests => 73;
+use Test::More tests => 74;
 
-BEGIN { use_ok('MIDI::Simple::Drummer') }
+BEGIN { use_ok('MIDI::Simple::Drummer::Rock') }
 
-my $d = eval { MIDI::Simple::Drummer->new };
-isa_ok $d, 'MIDI::Simple::Drummer';
+my $d = eval { MIDI::Simple::Drummer::Rock->new };
+isa_ok $d, 'MIDI::Simple::Drummer::Rock';
 ok !$@, 'created with no arguments';
 
 is $d->WHOLE, 'wn', 'WHOLE';
@@ -100,12 +100,12 @@ is $x, 'n56', 'option_strike patch';
 $x = $d->option_strike('Cowbell', 'Tambourine');
 like $x, qr/n5[46]/, 'option_strike options';
 
-$d = eval { MIDI::Simple::Drummer->new };
+$d = eval { MIDI::Simple::Drummer::Rock->new };
 $d->metronome;
 $x = grep { $_->[0] eq 'note' } @{$d->score->{Score}};
 ok $x == $d->beats * $d->phrases, 'metronome';
 
-$d = eval { MIDI::Simple::Drummer->new };
+$d = eval { MIDI::Simple::Drummer::Rock->new };
 $d->count_in;
 $x = grep { $_->[0] eq 'note' } @{$d->score->{Score}};
 ok $x == $d->beats, 'count_in';
@@ -142,7 +142,6 @@ is $x, 'n38,n42', 'backbeat_rhythm 2 fill';
 $x = $d->backbeat_rhythm(-beat => 3, -fill => 1);
 is $x, 'n35,n42', 'backbeat_rhythm 3 fill';
 
-$d->patterns;
 $x = $d->patterns(1);
 is $x, undef, 'get unknown pattern is undef';
 my $y = sub { $d->note($d->EIGHTH, $d->strike) };
@@ -155,6 +154,8 @@ $x = eval { $d->beat };
 ok $x, 'random beat';
 $x = eval { $d->fill };
 ok $x, 'random fill';
+$x = eval { $d->beat(-name => 'rock_1') };
+is $x, 'rock_1', 'named rock_1 beat';
 $x = eval { $d->beat(-name => 'y') };
 is $x, 'y', 'named y beat';
 $x = eval { $d->beat(-type => 'fill') };

@@ -8,6 +8,7 @@ my $d = MIDI::Simple::Drummer->new(
     -bpm     => shift || 111,
     -volume  => shift || 121,
     -phrases => shift || 2,
+    -file    => "$0.mid",
 );
 
 my $beat = 0;
@@ -25,7 +26,7 @@ for my $p (1 .. $d->phrases) {
         $fill = $d->fill(-last => $fill);
     }
 }
-$d->pattern('end fill' => \&fin);
+$d->patterns('end fill' => \&fin);
 $d->fill(-name => 'end');
 #fin($d); # Perfectly reasonable but not as sexy.
 

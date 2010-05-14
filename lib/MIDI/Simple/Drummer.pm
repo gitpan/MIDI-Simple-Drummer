@@ -1,142 +1,164 @@
 package MIDI::Simple::Drummer;
-our $VERSION = '0.00_18';
+our $VERSION = '0.00_19';
 use strict;
 use warnings;
 use MIDI::Simple;
 
 sub new { # Is there a drummer in the house?
     my $class = shift;
-    my $self  = {
+    my $self = {
         # MIDI
-        -channel => '9',
-        -volume => '100',
+        Channel => '9',
+        Volume => '100',
         # Rhythm
-        -style => 'Rock',
-        -accent => 30, # Volume increment
-        -bpm => 120,
-        -phrases => 4, # Also equals measures
-        -beats => 4, # Beats per measure
+        Style => 'Rock',
+        Accent => 30, # Volume increment
+        Bpm => 120,
+        Phrases => 4, # Also equals measures
+        Beats => 4,   # Beats per measure
         # The Goods[TM].
-        -file => 'Drummer.mid',
-        -kit => undef,
-        -patterns => undef,
-        -score => undef,
+        Score => undef,
+        File => 'Drummer.mid',
+        Kit => undef,
+        Patterns => undef,
         @_
     };
-    bless $self, ref($class) || $class;
-    $self->_setup;
+    bless $self, $class;
+    $self->_setup(@_);
     return $self;
 }
-
 sub _setup { # Where's my Roadies, Man?
     my $self = shift;
 
-    # See if we have something to play.
-    my $style = 'MIDI::Simple::Drummer::' . $self->{-style};
-    eval "require $style";
-    for my $m (qw(kit patterns)) {
-        next if $self->{'-'.$m};
-        my $s = eval sprintf('%s::%s()', $style, $m);
-        my $x = $self->_setting($m, %$s);
-    }
+    # XXX For now there is only one, linear score so: TODO Multitrack!
+    $self->{Score} ||= MIDI::Simple->new_score;
+    $self->{Score}->noop('c'.$self->{Channel}, 'V'.$self->{Volume});
+    $self->{Score}->set_tempo(int(60_000_000 / $self->{Bpm}));
 
-    # Give unto us a blank score, onto which we can inscribe inscriptions.
-    $self->score(MIDI::Simple->new_score); # XXX unless $self->score; ?
-    $self->tempo(int(60_000_000 / $self->{-bpm}));
-    $self->no_op('c'.$self->{-channel}, 'V'.$self->{-volume});
+    # Give unto us a drum, so that we might bang upon it all day, instead of working.
+    $self->{Kit} ||= $self->_default_kit();
+    $self->{Patterns} ||= $self->_default_patterns();
+
+    return $self;
 }
 
-sub _n2p { return {%MIDI::notenum2percussion} } # Convenience functions.
-sub _p2n { return {%MIDI::percussion2notenum} }
+sub _n2p { return \%MIDI::notenum2percussion } # Convenience functions.
+sub _p2n { return \%MIDI::percussion2notenum }
 
-sub WHOLE {'wn'} # Readable durations.
+# Accessors.
+sub channel { # I guess you could use a different instrument...
+    my $self = shift;
+    $self->{Channel} = shift if @_;
+    return $self->{Channel}
+}
+sub bpm { # Beats per minute.
+    my $self = shift;
+    $self->{Bpm} = shift if @_;
+    return $self->{Bpm}
+}
+sub volume { # TURN IT DOWN IN THERE!
+    my $self = shift;
+    $self->{Volume} = shift if @_;
+    return $self->{Volume}
+}
+sub phrases { # o/` How many more times? Treat me the way you wanna do?
+    my $self = shift;
+    $self->{Phrases} = shift if @_;
+    return $self->{Phrases}
+}
+sub beats { # Beats per measure.
+    my $self = shift;
+    $self->{Beats} = shift if @_;
+    return $self->{Beats}
+}
+sub file { # The name of the file to write.
+    my $self = shift;
+    $self->{File} = shift if @_;
+    return $self->{File}
+}
+
+sub score { # The MIDI::Simple score with noop-ability.
+    my $self = shift;
+    $self->{Score} = shift if ref $_[0] eq 'MIDI::Simple';
+    # Set any remaining arguments as score no-ops.
+    $self->{Score}->noop($_) for @_;
+    return $self->{Score}
+}
+
+# API: Subclass and redefine to emit nuance.
+# API: Make a "ducker" method (i.e. the opposite).
+sub accent { # Pump up the dynamics (default Volume).
+    my $self = shift;
+    $self->{Accent} = shift if @_;
+    my $accent = $self->{Accent} + $self->volume;
+    $accent = $MIDI::Simple::Volume{fff}
+        if $accent > $MIDI::Simple::Volume{fff};
+    return $accent;
+}
+
+sub WHOLE {'wn'} # Readable durations.                                                                                                
 sub HALF {'hn'}
 sub QUARTER {'qn'}
 sub EIGHTH {'en'}
 sub SIXTEENTH {'sn'} # TODO THIRTYSECOND, SIXTYFOURTH
 
-sub no_op { shift->{-score}->noop(@_) } # Score pass-throughs.
-sub note  { shift->{-score}->n(@_) }
-sub rest  { shift->{-score}->r(@_) }
-sub tempo { shift->{-score}->set_tempo(@_) }
-
-# Accessors.
-sub channel { # I guess you could use a different instrument...
-    my $self = shift;
-    $self->{-channel} = shift if @_;
-    return $self->{-channel}
-}
-sub bpm { # Beats per minute.
-    my $self = shift;
-    $self->{-bpm} = shift if @_;
-    return $self->{-bpm}
-}
-sub volume { # TURN IT DOWN IN THERE!
-    my $self = shift;
-    $self->{-volume} = shift if @_;
-    return $self->{-volume}
-}
-sub phrases { # o/` How many more times? Treat me the way you wanna do?
-    my $self = shift;
-    $self->{-phrases} = shift if @_;
-    return $self->{-phrases}
-}
-sub beats { # Beats per measure.
-    my $self = shift;
-    $self->{-beats} = shift if @_;
-    return $self->{-beats}
-}
-sub file { # The name of the file to write.
-    my $self = shift;
-    $self->{-file} = shift if @_;
-    return $self->{-file}
-}
-sub score { # The MIDI::Simple score object.
-    my $self = shift;
-    $self->{-score} = shift if @_;
-    return $self->{-score}
-}
-sub style { # TODO Set kit and patterns if asked.
-    my $self = shift;
-    $self->{-style} = shift if @_;
-    return $self->{-style}
-}
-sub accent { # Accent a note.
-    my $self = shift;
-    $self->{-accent} = shift if @_;
-    # Increase volume.
-    my $accent = $self->{-volume} + $self->{-accent};
-    $accent = $MIDI::Simple::Volume{fff}
-        if $accent > $MIDI::Simple::Volume{fff};
-    return $accent;
-}
 sub kit { # Arrayrefs of patches.
     my $self = shift;
-    return $self->_setting('kit', @_);
+    return $self->_type('Kit', @_);
 }
 sub patterns { # Coderefs of patterns.
     my $self = shift;
-    return $self->_setting('patterns', @_);
+    return $self->_type('Patterns', @_);
 }
 
-# XXX This is a frightfully stupid design:
-sub _set_get { # Kit access.
+# XXX This _type() method is exceedingly ugly.
+sub _type { # Kit and pattern access.
+    my $self = shift;
+    my $type = shift || return;
+    if(!@_) { # If no arguments return all known types.
+        return $self->{$type};
+    }
+    elsif(@_ == 1) { # Return a named type.
+        my $i = shift;
+        return wantarray
+            ? ($i => $self->{$type}{$i})
+            : $self->{$type}{$i};
+    }
+    elsif(@_ > 1 && !(@_ % 2)) { # Add new types.
+        my %args = @_;
+        my @t = ();
+        while(my($i, $v) = each %args) {
+            $self->{$type}{$i} = $v;
+            push @t, $i;
+        }
+        # Return the named types.
+        return wantarray
+            ? (map { $_ => $self->{$type}{$_} } @t) # Hash of named types.
+            : @t > 1                                # More than one?
+                ? [map { $self->{$type}{$_} } @t]   # Arrayref of types.
+                : $self->{$type}{$t[0]};            # Single type.
+    }
+    else {
+        warn "WARNING: Not sure what to do with the provided arguments...";
+    }
+}
+
+sub _set_get { # Internal kit access.
     my $self = shift;
     my $key = shift || return;
-    my $option = shift || 0;
+    # Set the kit event.
     $self->kit($key => [@_]) if @_;
-    return $option
-        ? $self->option_strike(@{$self->kit($key)})
-        : $self->strike(@{$self->kit($key)});
+    return $self->option_strike(@{$self->kit($key)});
 }
-sub backbeat { return shift->_set_get(backbeat => 0, @_) }
-sub snare    { return shift->_set_get(snare => 1, @_) }
-sub kick     { return shift->_set_get(kick => 1, @_) }
-sub tick     { return shift->_set_get(tick => 1, @_) }
-sub hhat     { return shift->_set_get(hhat => 1, @_) }
-sub crash    { return shift->_set_get(crash => 1, @_) }
-sub ride     { return shift->_set_get(ride => 1, @_) }
-sub tom      { return shift->_set_get(tom => 1, @_) }
+# API: Add "something"s to your kit & patterns, in a subclass.
+sub backbeat { return shift->_set_get('backbeat', @_) }
+sub snare    { return shift->_set_get('snare', @_) }
+sub kick     { return shift->_set_get('kick', @_) }
+sub tick     { return shift->_set_get('tick', @_) }
+sub hhat     { return shift->_set_get('hhat', @_) }
+sub crash    { return shift->_set_get('crash', @_) }
+sub ride     { return shift->_set_get('ride', @_) }
+sub tom      { return shift->_set_get('tom', @_) }
 
 sub strike { # Return note values.
     my $self = shift;
@@ -144,20 +166,22 @@ sub strike { # Return note values.
     my @notes = map { 'n' . $MIDI::percussion2notenum{$_} } @patches;
     return wantarray ? @notes : join(',', @notes);
 }
+# API: Redefine this method to use a different decision than C<rand>.
 sub option_strike { # When in doubt, crash.
     my $self = shift;
     my @patches = @_ ? @_ : @{$self->kit('crash')};
     return $self->strike($patches[int(rand @patches)]);
 }
 
-# Compositional tools.
+# Composition tools.
 sub rotate { # Rotate through a list of patches. Default backbeat.
     my $self = shift;
     my $beat = shift || 1;
     my $patches = shift || $self->kit('backbeat');
     return $self->strike($patches->[$beat % @$patches]);
 }
-sub rotate_backbeat { # Rotate the backbeat, tick and post-fill option strike.
+sub backbeat_rhythm { # AC/DC forever.
+    # Rotate the backbeat with tick & post-fill strike.
     my $self = shift;
     my %args = (
         -beat => 1,
@@ -167,59 +191,34 @@ sub rotate_backbeat { # Rotate the backbeat, tick and post-fill option strike.
         -options => scalar $self->kit('crash'),
         @_
     );
+    # Strike a cymbal (or the provided options).
     my $c = $args{-beat} == 1 && $args{-fill}
-        ? $self->option_strike(@{$args{-options}}) : $self->strike(@{$args{-tick}});
+        ? $self->option_strike(@{$args{-options}})
+        : $self->strike(@{$args{-tick}});
+    # Rotate the backbeat.
     my $n = $self->rotate($args{-beat}, $args{-backbeat});
+    # Return the cymbal and backbeat note.
     return wantarray ? ($n, $c) : join(',', $n, $c);
 }
+
+# Readable, MIDI score pass-throughs.
+sub note { return shift->{Score}->n(@_) }
+sub rest { return shift->{Score}->r(@_) }
 
 sub count_in {
     my $self = shift;
     my $bars = shift || 1;
     my $strike = @_ ? $self->strike(@_) : $self->tick;
-    my $accent = $self->accent;
-    for my $i (1 .. $self->{-beats} * $bars) {
-        $self->no_op('V'.$accent) if $i % $self->{-beats} == 1;
+    for my $i (1 .. $self->beats * $bars) {
+        $self->score('V'.$self->accent) if $i % $self->beats == 1;
         $self->note(QUARTER(), $strike);
-        $self->no_op('V'.$self->{-volume}) if $i % $self->{-beats} == 1;
+        $self->score('V'.$self->volume) if $i % $self->beats == 1;
     }
     return $strike;
 }
 sub metronome {
     my $self = shift;
-    return $self->count_in($self->{-phrases}, shift || 'Pedal Hi-Hat');
-}
-
-# XXX This is a frightfully stupid design:
-sub _setting {
-    my $self = shift;
-    my $type = '-' . shift || return;
-    if(!@_) {
-        # Return all known types if no arguments.
-        return $self->{$type};
-    }
-    elsif(@_ == 1) {
-        # Return the named type.
-        my $p = shift;
-        return wantarray
-            ? ($p => $self->{$type}{$p})
-            :        $self->{$type}{$p};
-    }
-    elsif(@_ > 1) {
-        # Add new type(s) to our collection.
-        my %args = @_;
-        my @p = ();
-        while(my($p, $v) = each %args) {
-            $self->{$type}{$p} = $v;
-            push @p, $p;
-        }
-        # Return the named type(s).
-        return wantarray
-            ? (map { $_ => $self->{$type}{$_} } @p) # Hash of named types.
-            : @p > 1
-                ? [map { $self->{$type}{$_} } @p]   # Arrayref of types.
-                : $self->{$type}{$p[0]};            # Single type.
-    }
+    return $self->count_in($self->phrases, shift || 'Pedal Hi-Hat');
 }
 
 sub beat { # Pattern selector method.
@@ -233,25 +232,21 @@ sub beat { # Pattern selector method.
     );
 
     # Get the names of the known patterns.
-    my @k = ref($self->{-patterns}) eq 'HASH'
-          ? keys %{$self->{-patterns}}
-          : undef;
-    # Bail out if there are none.
-    return undef unless @k;
+    return undef unless ref($self->patterns) eq 'HASH';
+    my @k = keys %{$self->patterns};
 
     # Do we want a certain type that isn't already in the given name?
+    # XXX This part is a bit dodgy.
     my $n = $args{-name} && $args{-type} && $args{-name} !~ /^.+\s+$args{-type}$/
           ? "$args{-name} $args{-type}"
           : $args{-name};
 
-    # Return the only pattern if there is only one.
-    if(@k == 1) {
+    if(@k == 1) { # Return the only pattern if there is only one.
         $n = $k[0];
     }
-    else {
-        # Otherwise choose a different pattern.
+    else { # Otherwise choose a different pattern.
         while($n eq 0 || $n eq $args{-last}) {
-            # TODO Allow custom method of "randomization?"
+            # TODO API: Allow custom decision method.
             $n = $k[int(rand @k)];
             if($args{-type}) {
                 (my $t = $n) =~ s/^.+\s+($args{-type})$/$1/;
@@ -262,7 +257,7 @@ sub beat { # Pattern selector method.
     }
 
     # Beat it.
-    $self->{-patterns}{$n}->($self, %args);
+    $self->{Patterns}{$n}->($self, %args);
     return $n;
 }
 sub fill {
@@ -272,9 +267,48 @@ sub fill {
 
 sub write { # You gotta get it out there, you know. Make some buzz, Man.
     my $self = shift;
-    my $file = shift || $self->{-file};
-    $self->{-score}->write_score($file);
-    return -e $self->{-file} ? $file : 0;
+    my $file = shift || $self->{File};
+    $self->{Score}->write_score($file);
+    return -e $file ? $file : 0;
+}
+
+# API: Redefine the kit & patterns methods in a subclass.
+sub _default_patterns {
+    my $self = shift;
+    return {};  # Nothing to see here. Move along.
+}
+sub _default_kit {
+    my $self = shift;
+    return {
+      backbeat => ['Acoustic Snare', 'Acoustic Bass Drum'],
+      snare    => ['Acoustic Snare'],     # 38
+      kick     => ['Acoustic Bass Drum'], # 35
+      tick     => ['Closed Hi-Hat'],
+      hhat     => [
+        'Closed Hi-Hat',  # 42
+        'Open Hi-Hat',    # 46
+        'Pedal Hi-Hat',   # 44
+      ],
+      crash => [
+        'Chinese Cymbal', # 52
+        'Crash Cymbal 1', # 49
+        'Crash Cymbal 2', # 57
+        'Splash Cymbal',  # 55
+      ],
+      ride => [
+        'Ride Bell',      # 53
+        'Ride Cymbal 1',  # 51
+        'Ride Cymbal 2',  # 59
+      ],
+      tom => [
+        'High Tom',       # 50
+        'Hi-Mid Tom',     # 48
+        'Low-Mid Tom',    # 47
+        'Low Tom',        # 45
+        'High Floor Tom', # 43
+        'Low Floor Tom',  # 41
+      ],
+  };
 }
 
 1;
@@ -296,7 +330,7 @@ Is there a drummer in the house?
   # A glorified metronome:
   $d->count_in;
   for(1 .. $d->phrases * $d->beats) {
-    $d->note($d->EIGHTH, $d->rotate_backbeat(-beat => $_));
+    $d->note($d->EIGHTH, $d->backbeat_rhythm(-beat => $_));
     $d->note($d->EIGHTH, $d->tick);
   }
 
@@ -312,7 +346,7 @@ Is there a drummer in the house?
         $fill = $d->fill(-last => $fill);
     }
   }
-  $d->pattern(fin => \&fin);
+  $d->patterns(fin => \&fin);
   $d->beat(-name => 'fin');
   $d->write;
   sub fin {
@@ -340,8 +374,8 @@ can be used to generate the phrases: stochastic, evolutionary,
 l-system, recursive descent grammar, whatever.
 
 Note that B<you>, the programmer, should know what the patterns and
-kit elements are named and what they do. For these, check out the
-included style(s), e.g. L<MIDI::Simple::Drummer::Rock>.
+kit elements are named and what they do.  For these, check out the
+source of this package and the included style subclass(es).
 
 The default kit is the B<exciting>, general MIDI drumkit.  Fortunately,
 you can import the C<.mid> file into your favorite sequencer and
@@ -349,7 +383,7 @@ assign better patches.  Voila!
 
 =head1 METHODS
 
-=head2 * new()
+=head2 new()
 
   my $d = MIDI::Simple::Drummer->new(%arguments);
 
@@ -358,91 +392,71 @@ Source.
 
 Currently, the accepted => default attributes are:
 
-  # MIDI settings.
-  -channel => '9',
-  -volume => '100',
-  # Rhythm metrics.
-  -accent => 30, # Volume increment
-  -bpm => 120,
-  -phrases => 4,
-  -beats => 4,
+  # MIDI
+  Channel => '9',
+  Volume => '100',
+  # Rhythm
+  Style => Rock,
+  Accent => 30,
+  Bpm => 120,
+  Phrases => 4,
+  Beats => 4,
   # The Goods[TM].
-  -kit => _rock_kit(),
-  -patterns => _rock_patterns(),
-  -file => 'Drummer.mid',
-  -score => MIDI::Simple->new_score(),
+  File => 'Drummer.mid',
+  Kit => This set by the API,
+  Patterns => This also set by the API,
+  Score => MIDI::Simple->new_score (set by the API),
 
 These can all be overridden with the constuctor or accessors.
 
-=head2 * volume()
+=head2 volume()
 
   $x = $d->volume;
   $x = $d->volume($y);
 
 Return or set the volume.
 
-=head2 * bpm()
+=head2 bpm()
 
-  $x = $d->bpm;
-  $d->bpm($x);
+Beats per minute.
 
-Return or set the beats per minute.
+=head2 phrases()
 
-=head2 * phrases()
+Number of phrases to play.
 
-  $x = $d->phrases;
-  $d->phrases($x);
+=head2 beats()
 
-Return or set the number of phrases to play.
+Number of beats per measure.
 
-=head2 * beats()
-
-  $x = $d->beats;
-  $d->beats($x);
-
-Return or set the number of beats per measure.
-
-=head2 * score()
+=head2 score()
 
   $x = $d->score;
-  $d->score($x);
+  $x = $d->score($y);
+  $x = $d->score($y, 'V127');
+  $x = $d->score($volume);
 
 Return or set the L<MIDI::Simple/score> object.
 
-=head2 * channel()
+If there are any other arguments, they are set as score no-ops.
 
-  $x = $d->channel;
-  $d->channel($x);
+=head2 channel()
 
-=head2 * file()
+MIDI channel.
 
-  $x = $d->file;
-  $d->file($x);
+=head2 file()
 
-=head2 * patterns()
+Name for the C<.mid> file to write.
 
-  $x = $d->patterns;
-  $d->patterns($x);
+=head2 patterns()
 
-=head2 * style()
+Return or set known style patterns.
 
-  $x = $d->style;
-  $d->style($x);
-
-=head2 * tempo()
-
-  $x = $d->tempo;
-  $d->tempo($x);
-
-=head2 * accent()
-
-  $x = $d->accent;
-  $x = $d->accent($y);
+=head2 accent()
 
 Either return the current volume plus the accent increment or set the
-accent increment.
+accent increment.  This has an upper limit of MIDI fff.
 
-=head2 * strike()
+=head2 strike()
 
   $x = $d->strike;
   $x = $d->strike('Cowbell');
@@ -453,7 +467,7 @@ Return note values for percussion names from the standard MIDI
 percussion set (with L<MIDI/notenum2percussion>) in either scalar or
 list context. (Default predefined snare patch.)
 
-=head2 * option_strike()
+=head2 option_strike()
 
   $x = $d->option_strike;
   $x = $d->option_strike('Short Guiro','Short Whistle','Vibraslap');
@@ -462,7 +476,7 @@ Return a note value from a list of patches (default predefined crash
 cymbals).  If another set of patches is given, one of those is chosen
 at random.
 
-=head2 * note()
+=head2 note()
 
   $d->note($d->SIXTEENTH, $d->snare);
   $d->note('sn', 'n38');
@@ -470,7 +484,7 @@ at random.
 Add a note to the score.  This is a pass-through to
 L<MIDI::Simple/n>.
 
-=head2 * rest()
+=head2 rest()
 
   $d->rest($d->SIXTEENTH);
   $d->rest('sn');
@@ -478,14 +492,14 @@ L<MIDI::Simple/n>.
 Add a rest to the score.  This is a pass-through to
 L<MIDI::Simple/r>.
 
-=head2 * no_op()
+=head2 no_op()
 
   $d->no_op('V127');
 
 Add a no-op to the score.  This is a pass-through to
 L<MIDI::Simple/noop>.
 
-=head2 * metronome()
+=head2 metronome()
 
   $d->metronome;
   $d->metronome('Mute Triangle');
@@ -493,7 +507,7 @@ L<MIDI::Simple/noop>.
 Add beats * phases of the C<Pedal Hi-Hat>, unless another patch is
 provided.
 
-=head2 * count_in()
+=head2 count_in()
 
   $d->count_in;
   $d->count_in(2);
@@ -504,7 +518,7 @@ And a-one and a-two and a-one, two, three!E<lt>E<sol>Lawrence WelkE<gt>
 
 If No arguments are provided, the C<Closed Hi-Hat> is used.
 
-=head2 * rotate()
+=head2 rotate()
 
   $x = $d->rotate;
   $x = $d->rotate(3);
@@ -513,20 +527,19 @@ If No arguments are provided, the C<Closed Hi-Hat> is used.
 Rotate through a list of patches according to the given beat number.
 (Default backbeat patches.)
 
-=head2 * rotate_backbeat()
+=head2 backbeat_rhythm()
 
-  $x = $d->rotate_backbeat;
-  $x = $d->rotate_backbeat(-beat => $y);
-  $x = $d->rotate_backbeat(-fill => $z);
-  $x = $d->rotate_backbeat(-options => ['Cowbell','Hand Clap']);
-  $x = $d->rotate_backbeat(-backbeat => ['Bass Drum 1','Electric Snare']);
-  $x = $d->rotate_backbeat(-tick => ['Claves']);
+  $x = $d->backbeat_rhythm;
+  $x = $d->backbeat_rhythm(-beat => $y);
+  $x = $d->backbeat_rhythm(-fill => $z);
+  $x = $d->backbeat_rhythm(-options => ['Cowbell','Hand Clap']);
+  $x = $d->backbeat_rhythm(-backbeat => ['Bass Drum 1','Electric Snare']);
+  $x = $d->backbeat_rhythm(-tick => ['Claves']);
 
 Return the rotating C<backbeat> with either the C<tick> or an option
-patch.  If the beat given is the first, a post-fill option strike is
-made.
+patch (default crashes), if it's the first beat and we just filled.
 
-=head2 * beat()
+=head2 beat()
 
   $x = $d->beat;
   $x = $d->beat(-name => $n);
@@ -552,21 +565,21 @@ is chosen.
 
 For C<-type =E<gt> 'fill'>, we append a named fill to the MIDI score.
 
-=head2 * fill()
+=head2 fill()
 
 This is an alias to the C<beat> method with
 C<-type =E<gt> 'fill'> added.
 
-=head2 * pattern()
+=head2 patterns()
 
-  $x = $d->pattern;
-  $x = $d->pattern('rock_1');
-  @x = $d->pattern(paraflamaramadiddle => \&code, 'foo fill' => \&foo_fill);
+  $x = $d->patterns;
+  $x = $d->patterns('rock_1');
+  @x = $d->patterns(paraflamaramadiddle => \&code, 'foo fill' => \&foo_fill);
 
-Return or set the code reference(s) to the named pattern(s).  If no
+Return or set the code references to the named patterns.  If no
 argument is given, all the known patterns are returned.
 
-=head2 * write()
+=head2 write()
 
   $x = $d->write;
   $x = $d->write('Buddy-Rich.mid');
@@ -578,7 +591,7 @@ C<-file> attribute.
 
 =head1 KIT ACCESS
 
-=head2 * kit()
+=head2 kit()
 
   $x = $d->kit;
   $x = $d->kit('snare');
@@ -588,7 +601,7 @@ C<-file> attribute.
 
 Return or set part or all of the percussion set.
 
-=head2 * hhat()
+=head2 hhat()
 
     $x = $d->hhat;
     $x = $d->hhat('Cabasa','Maracas','Claves');
@@ -596,7 +609,7 @@ Return or set part or all of the percussion set.
 Strike or set the "hhat" patches.  By default, these are the
 C<Closed Hi-Hat>, C<Open Hi-Hat> and the C<Pedal Hi-Hat.>
 
-=head2 * crash()
+=head2 crash()
 
     $x = $d->crash;
     $x = $d->crash(@crashes);
@@ -605,7 +618,7 @@ Strike or set the "crash" patches.  By default, these are the
 C<Chinese Cymbal>, C<Crash Cymbal 1>, C<Crash Cymbal 2> and the
 C<Splash Cymbal.>
 
-=head2 * ride()
+=head2 ride()
 
     $x = $d->ride;
     $x = $d->ride(@rides);
@@ -613,7 +626,7 @@ C<Splash Cymbal.>
 Strike or set the "ride" patches.  By default, these are the
 C<Ride Bell>, C<Ride Cymbal 1> and the C<Ride Cymbal 2.>
 
-=head2 * tom()
+=head2 tom()
 
     $x = $d->tom;
     $x = $d->tom('Low Conga','Mute Hi Conga','Open Hi Conga');
@@ -621,7 +634,7 @@ C<Ride Bell>, C<Ride Cymbal 1> and the C<Ride Cymbal 2.>
 Strike or set the "tom" patches.  By default, these are the
 C<High Tom>, C<Hi-Mid Tom>, etc.
 
-=head2 * kick()
+=head2 kick()
 
     $x = $d->kick;
     $x = $d->kick('Bass Drum 1');
@@ -629,7 +642,7 @@ C<High Tom>, C<Hi-Mid Tom>, etc.
 Strike or set the "kick" patch.  By default, this is the
 C<Acoustic Bass Drum>.
 
-=head2 * tick()
+=head2 tick()
 
     $x = $d->tick;
     $x = $d->tick('Mute Triangle');
@@ -637,7 +650,7 @@ C<Acoustic Bass Drum>.
 Strike or set the "tick" patch.  By default, this is the
 C<Closed Hi-Hat>.
 
-=head2 * snare()
+=head2 snare()
 
     $x = $d->snare;
     $x = $d->snare('Electric Snare');
@@ -645,7 +658,7 @@ C<Closed Hi-Hat>.
 Strike or set the "snare" patches.  By default, this is the
 C<Acoustic Snare.>
 
-=head2 * backbeat()
+=head2 backbeat()
 
     $x = $d->backbeat;
     $x = $d->backbeat('Bass Drum 1','Side Stick');
@@ -658,33 +671,33 @@ predefined C<kick> and C<snare> patches.
 These are meant to avoid literal strings and the need to remember
 and type the relevant MIDI variables.
 
-=head2 * WHOLE
+=head2 WHOLE
 
   $x = $d->WHOLE;
 
 Return C<'wn'>.
 
-=head2 * HALF
+=head2 HALF
 
 Return C<'hn'>.
 
-=head2 * QUARTER
+=head2 QUARTER
 
 Return C<'qn'>.
 
-=head2 * EIGHTH
+=head2 EIGHTH
 
 Return C<'en'>.
 
-=head2 * SIXTEENTH
+=head2 SIXTEENTH
 
 Return C<'sn'>.
 
-=head2 * _p2n()
+=head2 _p2n()
 
 Return C<%MIDI::percussion2notenum> a la L<MIDI/GOODIES>.
 
-=head2 * _n2p()
+=head2 _n2p()
 
 Return the inverse: C<%MIDI::notenum2percussion>.
 
@@ -692,20 +705,17 @@ Return the inverse: C<%MIDI::notenum2percussion>.
 
 * It don't mean a thing if it ain't got that swing.
 
-* Intelligently modulate dynamics (i.e. "add nuance" like accent or
-crescendo).
-
 * Add 32nd and 64th durations to C<%MIDI::Simple::Length.>
 
-* Comprehend time signature via beat construction and as a "running
-total" to know where you are in time, at all times.
+* Comprehend time signature via beat construction and keep a "running
+clock/total" to know where we are in time, at all times.
 
-* Possibly load patterns automatically with C<qw(:rock)> syntax, in
-the C<use> line.
+* Intelligently modulate dynamics - "add nuance" like accent or
+crescendo, etc.
 
-* Import patterns via L<MIDI::Simple/read_score>, maybe.
+* Import patterns via L<MIDI::Simple/read_score>?
 
-* Possibly leverage L<MIDI::Tab/from_drum_tab>.
+* Leverage L<MIDI::Tab/from_drum_tab>?
 
 =head1 SEE ALSO
 

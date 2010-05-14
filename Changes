@@ -1,5 +1,9 @@
 Revision history for MIDI-Simple-Drummer
 
+0.00_19 Fri 2010.05.14
+    - Refactored to use proper inheritance for distinct styles.
+    - Cleaned up much ugliness.
+
 0.00_18 Wed 2010.04.28
     - Factored-out kits and patterns.
     - Perceived the ugliness that I hacked-up... Must fix ASAP.

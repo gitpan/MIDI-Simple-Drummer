@@ -1,44 +1,10 @@
 package MIDI::Simple::Drummer::Rock;
-our $VERSION = '0.00_1';
+our $VERSION = '0.00_2';
 use strict;
 use warnings;
 use base 'MIDI::Simple::Drummer';
 
-sub kit {
-    my $self = shift;
-    return {
-        backbeat => ['Acoustic Snare', 'Acoustic Bass Drum'],
-        snare    => ['Acoustic Snare'],     # 38
-        kick     => ['Acoustic Bass Drum'], # 35
-        tick     => ['Closed Hi-Hat'],
-        hhat     => [
-            'Closed Hi-Hat',  # 42
-            'Open Hi-Hat',    # 46
-            'Pedal Hi-Hat',   # 44
-        ],
-        crash => [
-            'Chinese Cymbal', # 52
-            'Crash Cymbal 1', # 49
-            'Crash Cymbal 2', # 57
-            'Splash Cymbal',  # 55
-        ],
-        ride => [
-            'Ride Bell',      # 53
-            'Ride Cymbal 1',  # 51
-            'Ride Cymbal 2',  # 59
-        ],
-        tom => [
-            'High Tom',       # 50
-            'Hi-Mid Tom',     # 48
-            'Low-Mid Tom',    # 47
-            'Low Tom',        # 45
-            'High Floor Tom', # 43
-            'Low Floor Tom',  # 41
-        ],
-    };
-}
-
-sub patterns {
+sub _default_patterns {
     my $self = shift;
     return {
         # Beats:
@@ -66,7 +32,7 @@ sub patterns {
             my $self = shift;
             my %args = @_;
             for my $beat (1 .. $self->beats) {
-                $self->note($self->EIGHTH, $self->rotate_backbeat(%args, -beat => $beat));
+                $self->note($self->EIGHTH, $self->backbeat_rhythm(%args, -beat => $beat));
                 $self->note($self->EIGHTH, $self->tick);
             }
         },
@@ -74,7 +40,7 @@ sub patterns {
             my $self = shift;
             my %args = @_;
             for my $beat (1 .. $self->beats) {
-                $self->note($self->EIGHTH, $self->rotate_backbeat(%args, -beat => $beat));
+                $self->note($self->EIGHTH, $self->backbeat_rhythm(%args, -beat => $beat));
                 $self->note($self->EIGHTH,
 ($beat == 3 ? ($self->kick, $self->tick) : $self->tick)
                 );
@@ -84,7 +50,7 @@ sub patterns {
             my $self = shift;
             my %args = @_;
             for my $beat (1 .. $self->beats) {
-                $self->note($self->EIGHTH, $self->rotate_backbeat(%args, -beat => $beat));
+                $self->note($self->EIGHTH, $self->backbeat_rhythm(%args, -beat => $beat));
                 $self->note($self->EIGHTH,
 ($beat == 4 ? ($self->kick, $self->tick) : $self->tick)
                 );
@@ -94,7 +60,7 @@ sub patterns {
             my $self = shift;
             my %args = @_;
             for my $beat (1 .. $self->beats) {
-                $self->note($self->EIGHTH, $self->rotate_backbeat(%args, -beat => $beat));
+                $self->note($self->EIGHTH, $self->backbeat_rhythm(%args, -beat => $beat));
                 $self->note($self->EIGHTH,
 ($beat == 3 || $beat == 4 ? ($self->kick, $self->tick) : $self->tick)
                 );
@@ -144,13 +110,16 @@ L<MIDI::Simple::Drummer>.
 
 =head1 FUNCTIONS
 
-=head2 kit()
+=head2 _default_kit()
 
-  my $kit = MIDI::Simple::Drummer::ROCK::kit();
+  my $kit = MIDI::Simple::Drummer::ROCK::_default_kit();
 
-=head2 patterns()
+This is actually here for illustration purposes, only.  This module
+inherits the default "General MIDI kit" from the parent.
 
-  my $patterns = MIDI::Simple::Drummer::ROCK::patterns();
+=head2 _default_patterns()
+
+  my $patterns = MIDI::Simple::Drummer::ROCK::_default_patterns();
 
 =head1 SEE ALSO
 
