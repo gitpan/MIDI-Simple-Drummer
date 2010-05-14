@@ -1,5 +1,9 @@
 Revision history for MIDI-Simple-Drummer
 
+0.00_20 Fri 2010.05.14
+    - Normalized things and cleaned up a bit.
+    - Made eg/* work again. :)
+
 0.00_19 Fri 2010.05.14
     - Refactored to use proper inheritance for distinct styles.
     - Cleaned up much ugliness.

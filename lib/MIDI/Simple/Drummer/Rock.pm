@@ -1,5 +1,5 @@
 package MIDI::Simple::Drummer::Rock;
-our $VERSION = '0.00_2';
+our $VERSION = '0.00_03';
 use strict;
 use warnings;
 use base 'MIDI::Simple::Drummer';
@@ -12,7 +12,7 @@ sub _default_patterns {
             # Quater-note beat: Qn tick. Cym on 1. Kick on 1&3. Snare on 2&4.
             my $self = shift;
             my %args = (
-                -options => [
+                -patches => [
                     'Closed Hi-Hat',
                     'Ride Bell',
                     'Ride Cymbal 2',
@@ -24,7 +24,7 @@ sub _default_patterns {
             for my $beat (1 .. $self->beats) {
                 $self->note($self->QUARTER,
                     $self->rotate($beat, $args{-rotate}),
-                    $self->option_strike(@{$args{options}})
+                    $self->option_strike(@{$args{-patches}})
                 );
             }
         },
@@ -112,18 +112,23 @@ L<MIDI::Simple::Drummer>.
 
 =head2 _default_kit()
 
-  my $kit = MIDI::Simple::Drummer::ROCK::_default_kit();
+  my $kit = $self->_default_kit();
 
-This is actually here for illustration purposes, only.  This module
-inherits the default "General MIDI kit" from the parent.
+This bit is here for illustration purposes.  This module inherits the
+default "General MIDI kit" from the parent.
 
 =head2 _default_patterns()
 
-  my $patterns = MIDI::Simple::Drummer::ROCK::_default_patterns();
+  my $patterns = $self->_default_patterns();
+
+Return a hash-reference of named code-references, that define the
+"style" we are playing.
 
 =head1 SEE ALSO
 
 L<MIDI::Simple::Drummer>
+
+L<MIDI::Simple::Drummer::API>
 
 =head1 AUTHOR AND COPYRIGHT
 

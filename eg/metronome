@@ -11,7 +11,7 @@ my $d = MIDI::Simple::Drummer->new(
 $d->count_in(2);
 for my $p (1 .. $d->phrases) {
     for my $p (1 .. $d->beats) {
-        $d->note($d->EIGHTH, $d->rotate_backbeat(-beat => $p));
+        $d->note($d->EIGHTH, $d->backbeat_rhythm(-beat => $p));
         $d->note($d->EIGHTH, $d->tick);
 #        $d->note($d->EIGHTH, $d->tick);
     }

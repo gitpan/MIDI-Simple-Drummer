@@ -3,6 +3,7 @@ eg/basics
 eg/drummer
 eg/metronome
 lib/MIDI/Simple/Drummer.pm
+lib/MIDI/Simple/Drummer/API.pod
 lib/MIDI/Simple/Drummer/Rock.pm
 MANIFEST			This list of files
 README

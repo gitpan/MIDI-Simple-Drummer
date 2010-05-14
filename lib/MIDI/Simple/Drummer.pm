@@ -1,5 +1,5 @@
 package MIDI::Simple::Drummer;
-our $VERSION = '0.00_19';
+our $VERSION = '0.00_20';
 use strict;
 use warnings;
 use MIDI::Simple;
@@ -24,7 +24,7 @@ sub new { # Is there a drummer in the house?
         @_
     };
     bless $self, $class;
-    $self->_setup(@_);
+    $self->_setup();
     return $self;
 }
 sub _setup { # Where's my Roadies, Man?
@@ -112,7 +112,7 @@ sub patterns { # Coderefs of patterns.
 }
 
 # XXX This _type() method is exceedingly ugly.
-sub _type { # Kit and pattern access.
+sub _type { # Both kit and pattern access.
     my $self = shift;
     my $type = shift || return;
     if(!@_) { # If no arguments return all known types.
@@ -136,10 +136,10 @@ sub _type { # Kit and pattern access.
             ? (map { $_ => $self->{$type}{$_} } @t) # Hash of named types.
             : @t > 1                                # More than one?
                 ? [map { $self->{$type}{$_} } @t]   # Arrayref of types.
-                : $self->{$type}{$t[0]};            # Single type.
+                : $self->{$type}{$t[0]};            # Else single type.
     }
     else {
-        warn "WARNING: Not sure what to do with the provided arguments...";
+        warn "WARNING: Not sure what to do with the arguments, Man.";
     }
 }
 
@@ -150,6 +150,7 @@ sub _set_get { # Internal kit access.
     $self->kit($key => [@_]) if @_;
     return $self->option_strike(@{$self->kit($key)});
 }
+
 # API: Add "something"s to your kit & patterns, in a subclass.
 sub backbeat { return shift->_set_get('backbeat', @_) }
 sub snare    { return shift->_set_get('snare', @_) }
@@ -173,7 +174,6 @@ sub option_strike { # When in doubt, crash.
     return $self->strike($patches[int(rand @patches)]);
 }
 
-# Composition tools.
 sub rotate { # Rotate through a list of patches. Default backbeat.
     my $self = shift;
     my $beat = shift || 1;
@@ -188,12 +188,12 @@ sub backbeat_rhythm { # AC/DC forever.
         -fill => 0,
         -backbeat => scalar $self->kit('backbeat'),
         -tick => scalar $self->kit('tick'),
-        -options => scalar $self->kit('crash'),
+        -patches => scalar $self->kit('crash'),
         @_
     );
-    # Strike a cymbal (or the provided options).
+    # Strike a cymbal (or the provided patches).
     my $c = $args{-beat} == 1 && $args{-fill}
-        ? $self->option_strike(@{$args{-options}})
+        ? $self->option_strike(@{$args{-patches}})
         : $self->strike(@{$args{-tick}});
     # Rotate the backbeat.
     my $n = $self->rotate($args{-beat}, $args{-backbeat});
@@ -335,6 +335,9 @@ Is there a drummer in the house?
   }
 
   # A smarter drummer:
+  use MIDI::Simple::Drummer::Rock;
+  $d = MIDI::Simple::Drummer::Rock->new(-bpm => 100);
+
   my($beat, $fill) = (0, 0);
   $d->count_in;
   for my $p (1 .. $d->phrases) {
@@ -532,7 +535,7 @@ Rotate through a list of patches according to the given beat number.
   $x = $d->backbeat_rhythm;
   $x = $d->backbeat_rhythm(-beat => $y);
   $x = $d->backbeat_rhythm(-fill => $z);
-  $x = $d->backbeat_rhythm(-options => ['Cowbell','Hand Clap']);
+  $x = $d->backbeat_rhythm(-patches => ['Cowbell','Hand Clap']);
   $x = $d->backbeat_rhythm(-backbeat => ['Bass Drum 1','Electric Snare']);
   $x = $d->backbeat_rhythm(-tick => ['Claves']);
 
@@ -700,6 +703,10 @@ Return C<%MIDI::percussion2notenum> a la L<MIDI/GOODIES>.
 =head2 _n2p()
 
 Return the inverse: C<%MIDI::notenum2percussion>.
+
+=head2 _default_patterns()
+
+=head2 _default_kit()
 
 =head1 TO DO
 
