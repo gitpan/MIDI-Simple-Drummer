@@ -1,3 +1,8 @@
+package MIDI::Simple::Drummer::API;
+our $VERSION = '0.00_02';
+1;
+__END__
+
 =head1 NAME
 
 MIDI::Simple::Drummer::API - DIY Beats
@@ -6,31 +11,27 @@ MIDI::Simple::Drummer::API - DIY Beats
 
 How to build your own drummer...
 
-=head1 CLASS METHODS
-
 For the most part, the essential methods are already documented in
-L<MIDI::Simple::Drummer>, itself, but this document is about extending
-the capabilities of our drummer.
+L<MIDI::Simple::Drummer>.  This document is about extending the
+capabilities of our drummer and is (obviously) incomplete.
 
-=head2 patterns()
+=head1 OPTIONS
 
-Style
+=head2 kit
 
-=head2 accent()
+Set instrumentation.
 
-Nuance
+=head2 style
 
-=head2 kit()
+Define patterns.
 
-Instrumentation
+=head2 dynamics
 
-=head2 backbeat()
+Define nuance methods.
 
-Try useing alternate patches!
+=head1 TO DO
 
-=head2 TO DO
-
-Flesh-out this doc!
+Flesh-out this document!
 
 =head1 SEE ALSO
 

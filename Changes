@@ -1,5 +1,8 @@
 Revision history for MIDI-Simple-Drummer
 
+0.00_21 Fri 2010.05.15
+    - Cleaned up docs a bit.
+
 0.00_20 Fri 2010.05.14
     - Normalized things and cleaned up a bit.
     - Made eg/* work again. :)

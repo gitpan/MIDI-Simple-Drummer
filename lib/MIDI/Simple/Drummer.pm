@@ -1,5 +1,5 @@
 package MIDI::Simple::Drummer;
-our $VERSION = '0.00_20';
+our $VERSION = '0.00_21';
 use strict;
 use warnings;
 use MIDI::Simple;
@@ -324,10 +324,9 @@ Is there a drummer in the house?
 
 =head1 SYNOPSIS
 
+  # A glorified metronome:
   use MIDI::Simple::Drummer;
   my $d = MIDI::Simple::Drummer->new(-bpm => 100);
-
-  # A glorified metronome:
   $d->count_in;
   for(1 .. $d->phrases * $d->beats) {
     $d->note($d->EIGHTH, $d->backbeat_rhythm(-beat => $_));
@@ -337,7 +336,6 @@ Is there a drummer in the house?
   # A smarter drummer:
   use MIDI::Simple::Drummer::Rock;
   $d = MIDI::Simple::Drummer::Rock->new(-bpm => 100);
-
   my($beat, $fill) = (0, 0);
   $d->count_in;
   for my $p (1 .. $d->phrases) {
@@ -710,15 +708,18 @@ Return the inverse: C<%MIDI::notenum2percussion>.
 
 =head1 TO DO
 
-* It don't mean a thing if it ain't got that swing.
+* It don't mean a thing if it ain't got that swing. (That is, make a
+<MIDI::Simple::Drummer::Jazz> package.)
 
-* Add 32nd and 64th durations to C<%MIDI::Simple::Length.>
+* Add 32nd and 64th durations to C<%MIDI::Simple::Length>.
 
 * Comprehend time signature via beat construction and keep a "running
 clock/total" to know where we are in time, at all times.
 
 * Intelligently modulate dynamics - "add nuance" like accent or
 crescendo, etc.
+
+* Multi-track ASAP!
 
 * Import patterns via L<MIDI::Simple/read_score>?
 
@@ -728,7 +729,7 @@ crescendo, etc.
 
 The F<eg/*> and F<t/*> files, that come with this distribution.
 
-The C<MIDI::Simple::Drummer::*> style package(s).
+The I<MIDI::Simple::Drummer::*> style package(s).
 
 L<MIDI::Simple> itself.
 
