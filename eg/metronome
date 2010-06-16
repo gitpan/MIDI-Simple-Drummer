@@ -8,6 +8,7 @@ my $d = MIDI::Simple::Drummer->new(
 #    -phrases => shift || 8,
 #    -beats   => shift || 3,
 );
+$d->kick('Bass Drum 1');
 $d->count_in(2);
 for my $p (1 .. $d->phrases) {
     for my $p (1 .. $d->beats) {

@@ -4,7 +4,7 @@ INSTALLATION
 
 Using CPAN:
 
-  sudo cpan MIDI::Simple::Drummer  # Shazaam!
+  sudo cpan MIDI MIDI::Simple::Drummer  # Shazaam!
 
 Do it by hand (and get the eg/ directory):
 

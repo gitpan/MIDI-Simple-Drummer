@@ -1,5 +1,5 @@
 package MIDI::Simple::Drummer::Rock;
-our $VERSION = '0.00_03';
+our $VERSION = '0.00_04';
 use strict;
 use warnings;
 use base 'MIDI::Simple::Drummer';
@@ -7,16 +7,14 @@ use base 'MIDI::Simple::Drummer';
 sub _default_patterns {
     my $self = shift;
     return {
-        # Beats:
-        rock_1 => sub {
-            # Quater-note beat: Qn tick. Cym on 1. Kick on 1&3. Snare on 2&4.
+
+        1 => sub { # "Quater-note beat" Qn tick. Cym on 1. Kick 1&3. Snare 2&4.
             my $self = shift;
             my %args = (
                 -patches => [
                     'Closed Hi-Hat',
                     'Ride Bell',
                     'Ride Cymbal 2',
-#                    'Tambourine', # Maybe...
 #                    'Cowbell', # Maybe not.
                 ],
                 @_
@@ -28,7 +26,8 @@ sub _default_patterns {
                 );
             }
         },
-        rock_2 => sub { # Basic rock beat: en c-hh. qn k1,3. qn s2,4. Crash after fill.
+
+        2 => sub { # "Basic rock beat" en c-hh. qn k1,3. qn s2,4. Crash after fill.
             my $self = shift;
             my %args = @_;
             for my $beat (1 .. $self->beats) {
@@ -36,7 +35,8 @@ sub _default_patterns {
                 $self->note($self->EIGHTH, $self->tick);
             }
         },
-        rock_3 => sub { # Main beat: en c-hh. qn k1,3,3&. qn s2,4.
+
+        3 => sub { # "Main beat" en c-hh. qn k1,3,3&. qn s2,4.
             my $self = shift;
             my %args = @_;
             for my $beat (1 .. $self->beats) {
@@ -46,7 +46,8 @@ sub _default_patterns {
                 );
             }
         },
-        rock_4 => sub { # Syncopated beat 1: en c-hh. qn k1,3,4&. qn s2,4.
+
+        4 => sub { # "Syncopated beat 1" en c-hh. qn k1,3,4&. qn s2,4.
             my $self = shift;
             my %args = @_;
             for my $beat (1 .. $self->beats) {
@@ -56,7 +57,8 @@ sub _default_patterns {
                 );
             }
         },
-        rock_5 => sub { # Syncopated beat 2: en c-hh. qn k1,3,3&,4&. qn s2,4.
+
+        5 => sub { # "Syncopated beat 2" en c-hh. qn k1,3,3&,4&. qn s2,4.
             my $self = shift;
             my %args = @_;
             for my $beat (1 .. $self->beats) {
@@ -66,20 +68,20 @@ sub _default_patterns {
                 );
             }
         },
-        # Fills:
-        'snare_1 fill' => sub {
+
+        '1 fill' => sub {
             my $self = shift;
             $self->note($self->QUARTER, $self->snare) for 0 .. 1;
             $self->note($self->EIGHTH, $self->snare) for 0 .. 3;
         },
-        'snare_2 fill' => sub {
+        '2 fill' => sub {
             my $self = shift;
             $self->note($self->EIGHTH, $self->snare) for 0 .. 1;
             $self->rest($self->EIGHTH);
             $self->note($self->EIGHTH, $self->snare);
             $self->note($self->QUARTER, $self->snare) for 0 .. 1;
         },
-        'snare_3 fill' => sub {
+        '3 fill' => sub {
             my $self = shift;
             $self->note($self->EIGHTH, $self->snare) for 0 .. 1;
             $self->rest($self->EIGHTH);
@@ -87,7 +89,7 @@ sub _default_patterns {
             $self->rest($self->EIGHTH);
             $self->note($self->EIGHTH, $self->snare);
         },
-        'snare_4 fill' => sub {
+        '4 fill' => sub {
             my $self = shift;
             $self->note($self->QUARTER, $self->snare) for 0 .. 1;
             $self->note($self->SIXTEENTH, $self->snare) for 0 .. 3;

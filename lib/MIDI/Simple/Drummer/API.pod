@@ -1,51 +1,205 @@
-package MIDI::Simple::Drummer::API;
-our $VERSION = '0.00_02';
-1;
-__END__
+=head1 My Robot Drummer...
 
-=head1 NAME
+=head2 DIY Beats or "How to build your own drummer."
 
-MIDI::Simple::Drummer::API - DIY Beats
+=head3 Gene Boggs
 
-=head1 DESCRIPTION
+=head4 Epistemologist at-large
 
-How to build your own drummer...
+=head1 MIDI::Simple::Drummer
 
-For the most part, the essential methods are already documented in
-L<MIDI::Simple::Drummer>.  This document is about extending the
-capabilities of our drummer and is (obviously) incomplete.
+=over
 
-=head1 OPTIONS
+=item 1
 
-=head2 kit
+Install
+L<it|http://search.cpan.org/CPAN/authors/id/G/GE/GENE/MIDI-Simple-Drummer-0.00_21.tar.gz>
+on any machine.
+
+=item 2
+
+It only depends on
+L<MIDI-Perl|http://search.cpan.org/~conklin/MIDI-Perl/>,
+which depends on nothing but Perl itself!
+
+=back
+
+=head1 Static, not dynamic. Sorry.
+
+=over
+
+=item
+
+This package renders a F<.mid> file.  It does not magically interact
+with you.
+
+=back
+
+=head1 MIDI::Simple::Drummer::API
+
+=over
+
+=item
+
+The essential methods are briefly documented in
+L<MIDI::Simple::Drummer|http://search.cpan.org/~gene/MIDI-Simple-Drummer/>.
+
+=item
+
+But we want to extend the capabilities of our drummer!
+
+=item
+
+But first, let's check out those "essential methods" a bit...
+
+=back
+
+=head1 Kit
+
+=begin html
+
+<img src="pix/My-Nerd-Drums.jpg" style="float:right; vertical-align:top"/>
+
+=end html
+
+=over
+
+=item
 
 Set instrumentation.
 
-=head2 style
+=back
 
-Define patterns.
+=head1 Style
 
-=head2 dynamics
+=over
 
-Define nuance methods.
+=item
 
-=head1 TO DO
+Define patterns and grooves, fills and frilly bits.
 
-Flesh-out this document!
+=back
 
-=head1 SEE ALSO
+=head1 Dynamics
 
-Style package(s) like L<MIDI::Simple::Drummer::Rock>.
+=over
 
-=head1 AUTHOR AND COPYRIGHT
+=item
 
-Gene Boggs E<lt>gene@cpan.orgE<gt>
+Intelligently modulate dynamics.
 
-Copyright 2010, Gene Boggs, All Rights Reserved.
+=item
 
-=head1 LICENSE
+Add nuance methods like accent and crescendo, legato, etc.
 
-This program is free software; you can redistribute or modify it under
-the same terms as Perl itself.
+=back
+
+=head1 Setup
+
+=begin perl
+
+ sub _setup { # Where's my Roadies, Man?
+    my $self = shift;
+    $self->{-score} ||= MIDI::Simple->new_score;
+    $self->{-score}->noop('c'.$self->{-channel}, 'V'.$self->{-volume});
+    $self->{-score}->set_tempo(int(60_000_000 / $self->{-bpm}));
+    # Give unto us a drum, so that we might bang upon it all day, instead of working.
+    $self->{-kit} ||= $self->_default_kit();
+    $self->{-patterns} ||= $self->_default_patterns();
+    return $self;
+ }
+
+=end perl
+
+=head1 Any sufficiently advanced drummer...
+
+=over
+
+=item
+
+...will probably still sound like a robot.
+
+=item
+
+But there is hope!  There is AI.  And anyway, thare are other
+"humanized" machines out there already.
+
+=item
+
+And frankly, some people just want to get away from Humans and
+their feeble "capabilities" and experiment with B<The Future>.
+
+=back
+
+=head1 The Future[TM]
+
+=over
+
+=item *
+
+Drummers that do crazy, combinatorial things.  (Stunt Drumming, if you will.)
+
+=item *
+
+Drummers that systematically run through experimental beat patterns.
+
+=item *
+
+Evolutionary drummers. Duh.
+
+=item *
+
+Real-time interaction?  That is, live jamming?
+
+=back
+
+=head1 To do
+
+=over
+
+=item *
+
+Multi-track!
+
+=item *
+
+Comprehend time signature and keep a running clock to know where we
+are in time, at all times.
+
+=item *
+
+It don't mean a thing if it ain't got that swing.
+That is, make a I<MIDI::Simple::Drummer::Jazz> package.
+
+=item *
+
+Add 32nd and 64th durations to the I<%MIDI::Simple::Length> hash.
+
+=item *
+
+Import patterns via the I<read_score()> method in
+L<MIDI::Simple|http://search.cpan.org/~conklin/MIDI-Perl/>?
+
+=item *
+
+Leverage the I<from_drum_tab()> method in
+L<MIDI::Tab|http://search.cpan.org/~rsymes/MIDI-Tab/>?
+
+=back
+
+=head1 See also
+
+=over
+
+=item
+
+The F<eg/*> and F<t/*> files, that come with the distribution.
+
+=item
+
+Style package(s) like
+L<MIDI::Simple::Drummer::Rock|http://search.cpan.org/~gene/MIDI-Simple-Drummer-0.00_21/lib/MIDI/Simple/Drummer/Rock.pm>.
+
+=back
 
 =cut

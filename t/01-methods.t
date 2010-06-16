@@ -1,7 +1,7 @@
 #!perl -T
 use strict;
 use warnings;
-use Test::More tests => 73;
+use Test::More tests => 74;
 
 BEGIN { use_ok('MIDI::Simple::Drummer') }
 
@@ -66,6 +66,9 @@ $x = $d->kit('clank');
 is $x, undef, 'kit clank undef';
 $x = $d->kit(clunk => ['Foo','Bar']);
 is_deeply $x, ['Foo','Bar'], 'kit set clunk';
+
+$x = $d->name_of('kick');
+is $x, 'Acoustic Bass Drum', 'kick is Acoustic Bass Drum';
 
 $x = $d->snare;
 is $x, 'n38', 'snare';

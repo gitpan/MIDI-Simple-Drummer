@@ -1,5 +1,10 @@
 Revision history for MIDI-Simple-Drummer
 
+0.00_22 2010.06.15
+    - Fixed -kit vs Kit, -pat vs Pat, mixup. :\
+    - Fixed pattern name tests.
+    - Began to turn the API POD into a Pod::S5 slideshow.
+
 0.00_21 Fri 2010.05.15
     - Cleaned up docs a bit.
 
