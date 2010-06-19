@@ -1,5 +1,5 @@
 package MIDI::Simple::Drummer;
-our $VERSION = '0.00_22';
+our $VERSION = '0.00_23';
 use strict;
 use warnings;
 use MIDI::Simple;

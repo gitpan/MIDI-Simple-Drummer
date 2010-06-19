@@ -1,7 +1,9 @@
 Changes
+Drummer.mid
 eg/basics
 eg/drummer
 eg/metronome
+Gene-Krupa.mid
 lib/MIDI/Simple/Drummer.pm
 lib/MIDI/Simple/Drummer/API.pod
 lib/MIDI/Simple/Drummer/Rock.pm
