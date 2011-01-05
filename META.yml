@@ -1,22 +1,19 @@
---- #YAML:1.0
-name:               MIDI-Simple-Drummer
-version:            0.01
-abstract:           Glorified metronome
+---
+abstract: 'Glorified metronome'
 author:
-    - Gene Boggs <gene@cpan.org>
-license:            perl
-distribution_type:  module
-configure_requires:
-    ExtUtils::MakeMaker:  0
+  - 'Gene Boggs <gene@cpan.org>'
 build_requires:
-    ExtUtils::MakeMaker:  0
-requires:
-    MIDI:  0
-no_index:
-    directory:
-        - t
-        - inc
-generated_by:       ExtUtils::MakeMaker version 6.56
+  Test::More: 0
+configure_requires:
+  ExtUtils::MakeMaker: 6.31
+dynamic_config: 0
+generated_by: 'Dist::Zilla version 4.200000, CPAN::Meta::Converter version 2.102400'
+license: perl
 meta-spec:
-    url:      http://module-build.sourceforge.net/META-spec-v1.4.html
-    version:  1.4
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: 1.4
+name: MIDI-Simple-Drummer
+requires:
+  MIDI::Simple: 0
+  constant: 0
+version: 0.0101

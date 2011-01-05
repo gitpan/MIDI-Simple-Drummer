@@ -1,5 +1,5 @@
 package MIDI::Simple::Drummer;
-our $VERSION = '0.01';
+our $VERSION = '0.0101';
 use strict;
 use warnings;
 use MIDI::Simple;
@@ -376,10 +376,6 @@ __END__
 =head1 NAME
 
 MIDI::Simple::Drummer - Glorified metronome
-
-=head1 ABSTRACT
-
-Is there a drummer in the house?
 
 =head1 SYNOPSIS
 

@@ -1,4 +1,10 @@
 Changes
+LICENSE
+MANIFEST
+META.yml
+Makefile.PL
+README
+dist.ini
 eg/basics
 eg/durations
 eg/jazz-drummer
@@ -7,13 +13,9 @@ eg/rock-drummer
 lib/MIDI/Simple/Drummer.pm
 lib/MIDI/Simple/Drummer/Jazz.pm
 lib/MIDI/Simple/Drummer/Rock.pm
-MANIFEST			This list of files
-README
 t/00-load.t
 t/01-methods.t
 t/02-methods.t
 t/03-methods.t
-t/boilerplate.t
 t/pod-coverage.t
 t/pod.t
-META.yml                                 Module meta-data (added by MakeMaker)

@@ -5,6 +5,4 @@ use Test::More 'no_plan';
 BEGIN { use_ok( 'MIDI::Simple::Drummer' ) }
 BEGIN { use_ok( 'MIDI::Simple::Drummer::Rock' ) }
 BEGIN { use_ok( 'MIDI::Simple::Drummer::Jazz' ) }
-diag(
-"Testing Drummer $MIDI::Simple::Drummer::VERSION and Rock $MIDI::Simple::Drummer::Rock::VERSION, Perl $], $^X"
-);
+diag("Testing Drummer $MIDI::Simple::Drummer::VERSION, Perl $], $^X");

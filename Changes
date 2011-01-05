@@ -1,5 +1,8 @@
 Revision history for MIDI-Simple-Drummer
 
+0.0101 2011.01.05
+    - Refactored with Dist::Zilla.
+
 0.01 2011.01.04
     - Added rhythm metric attributes called bars() and swing().
     - It didn't mean a thing when it didn't have that swing. o/` Jazz.pm

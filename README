@@ -1,48 +1,13 @@
-MIDI-Simple-Drummer
 
-INSTALLATION
 
-Using CPAN:
+This archive contains the distribution MIDI-Simple-Drummer,
+version 0.0101:
 
-  sudo cpan MIDI MIDI::Simple::Drummer  # Shazaam!
+  Glorified metronome
 
-Do it by hand (and get the eg/ directory):
+This software is copyright (c) 2011 by Gene Boggs.
 
-  wget http://search.cpan.org/CPAN/authors/id/G/GE/GENE/MIDI-Simple-Drummer-X.Y_Z.tar.gz
-  tar zxvf MIDI-Simple-Drummer-X.Y_Z.tar.gz
-  cd MIDI-Simple-Drummer-X.Y_Z
-  perl Makefile.PL
-  make
-  make test
-  sudo make install
-  ls eg/ # Example usage
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
 
-SUPPORT AND DOCUMENTATION
 
-After installing, you can find documentation for this module with:
-
-    perldoc MIDI::Simple::Drummer
-
-You can also look for information at:
-
-    RT, CPAN's request tracker
-        http://rt.cpan.org/NoAuth/Bugs.html?Dist=MIDI-Simple-Drummer
-
-    AnnoCPAN, Annotated CPAN documentation
-        http://annocpan.org/dist/MIDI-Simple-Drummer
-
-    CPAN Ratings
-        http://cpanratings.perl.org/d/MIDI-Simple-Drummer
-
-    Search CPAN
-        http://search.cpan.org/dist/MIDI-Simple-Drummer/
-
-COPYRIGHT AND LICENCE
-
-Copyright (C) 2010 Gene Boggs
-
-This program is free software; you can redistribute it and/or modify it
-under the terms of either: the GNU General Public License as published
-by the Free Software Foundation; or the Artistic License.
-
-See http://dev.perl.org/licenses/ for more information.
