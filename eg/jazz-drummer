@@ -1,0 +1,51 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+use MIDI::Simple::Drummer::Jazz;
+
+my $d = MIDI::Simple::Drummer::Jazz->new(
+    -bpm     => shift || 111,
+    -volume  => shift || 121,
+    -phrases => shift || 1,
+    -file    => "$0.mid",
+);
+
+my ($beat, $fill) = (0, 0);
+
+$d->count_in;
+
+for my $p (1 .. $d->phrases) {
+    if($p % 2 > 0) {
+#warn"p: $p\n";
+        $beat = $d->beat(-name => 2, -fill => $fill);
+#warn"b: $beat, f: $fill\n";
+        $beat = $d->beat(-name => 1);
+#warn"b: $beat, f: $fill\n";
+    }
+    else {
+#warn"p: $p\n";
+        $beat = $d->beat(-name => 3);   # TODO [3,4,5]
+        $fill = $d->fill(-last => $fill);
+#warn"b: $beat, f: $fill\n";
+    }
+}
+
+#fin($d); # <- Perfectly reasonable but use the API:
+#$d->patterns('end fill' => \&fin);
+#$d->fill(-name => 'end');
+$fill = $d->fill(-name => 1);
+#warn"f: $fill\n";
+
+$d->rest($d->TRIPLET_WHOLE);
+
+$d->write;
+
+sub fin {
+    my $d = shift;
+    $d->note($d->TRIPLET_SIXTEENTH, $d->kick) for 0 .. 1;
+    $d->rest($d->TRIPLET_SIXTEENTH);
+    $d->note($d->TRIPLET_SIXTEENTH, $d->snare) for 0 .. 2;
+    $d->rest($d->TRIPLET_SIXTEENTH);
+    $d->note($d->TRIPLET_EIGHTH, $d->kick) for 1 .. 2;
+    $d->note($d->TRIPLET_EIGHTH, $d->strike('Splash Cymbal', $d->name_of('kick')));
+}

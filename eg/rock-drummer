@@ -1,7 +1,6 @@
 #!/usr/bin/perl
 use strict;
 use warnings;
-
 use MIDI::Simple::Drummer::Rock;
 
 my $d = MIDI::Simple::Drummer::Rock->new(
@@ -11,23 +10,22 @@ my $d = MIDI::Simple::Drummer::Rock->new(
     -file    => "$0.mid",
 );
 
-my $beat = 0;
-my $fill = 0;
+my ($beat, $fill) = (0, 0);
 
 $d->count_in;
 
 for my $p (1 .. $d->phrases) {
     if($p % 2 > 0) {
-        $beat = $d->beat(-name => 3, -fill => $fill);
-        $beat = $d->beat(-name => 3);
+        $beat = $d->beat(-name => 2.3, -fill => $fill);
+        $beat = $d->beat(-name => 2.3);
     }
     else {
-        $beat = $d->beat(-name => 4);   # TODO [2,4,5]
+        $beat = $d->beat(-name => 2.4);   # TODO [2,4,5]
         $fill = $d->fill(-last => $fill);
     }
 }
 
-#fin($d); # This is perfectly reasonable at the end. But in general use the API:
+#fin($d); # <- Perfectly reasonable but use the API:
 $d->patterns('end fill' => \&fin);
 $d->fill(-name => 'end');
 
@@ -38,6 +36,6 @@ sub fin {
     $d->note('en', $d->crash) for 1 .. 2;
     $d->note('sn', $d->snare) for 0 .. 2;
     $d->rest('sn');
-    $d->note('en', $d->kick) for 1 .. 2;
+    $d->note('ten', $d->kick) for 1 .. 2;
     $d->note('en', $d->strike('Splash Cymbal', $d->name_of('kick')));
 }

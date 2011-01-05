@@ -3,13 +3,16 @@ use strict;
 use warnings;
 use Test::More 'no_plan';
 
-BEGIN { use_ok('MIDI::Simple::Drummer::Rock') }
+BEGIN { use_ok('MIDI::Simple::Drummer::Jazz') }
 
-my $d = eval { MIDI::Simple::Drummer::Rock->new };
-isa_ok $d, 'MIDI::Simple::Drummer::Rock';
+my $d = eval { MIDI::Simple::Drummer::Jazz->new };
+isa_ok $d, 'MIDI::Simple::Drummer::Jazz';
 ok !$@, 'created with no arguments';
 
-my $x = $d->patterns(0);
+my $x = $d->swing();
+is $x, 1, 'swing set';
+
+$x = $d->patterns(0);
 is $x, undef, 'get unknown pattern is undef';
 my $y = sub { $d->note($d->EIGHTH, $d->strike) };
 $x = $d->patterns('y', $y);
@@ -32,7 +35,7 @@ isnt $x, 'y', 'last known beat';
 $x = eval { $d->beat(-last => 'y fill') };
 isnt $x, 'y fill', 'last known fill';
 
-$x = $d->write('Rock-Drummer.mid');
-ok $x eq 'Rock-Drummer.mid' && -e $x, 'named write';
+$x = $d->write('Jazz-Drummer.mid');
+ok $x eq 'Jazz-Drummer.mid' && -e $x, 'named write';
 unlink $x;
 ok !-e $x, 'removed';

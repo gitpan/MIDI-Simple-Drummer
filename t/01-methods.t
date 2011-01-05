@@ -1,7 +1,7 @@
 #!perl -T
 use strict;
 use warnings;
-use Test::More tests => 74;
+use Test::More 'no_plan';
 
 BEGIN { use_ok('MIDI::Simple::Drummer') }
 
@@ -9,16 +9,20 @@ my $d = eval { MIDI::Simple::Drummer->new };
 isa_ok $d, 'MIDI::Simple::Drummer';
 ok !$@, 'created with no arguments';
 
-is $d->WHOLE, 'wn', 'WHOLE';
-is $d->HALF, 'hn', 'HALF';
-is $d->QUARTER, 'qn', 'QUARTER';
-is $d->EIGHTH, 'en', 'EIGHTH';
-is $d->SIXTEENTH, 'sn', 'SIXTEENTH';
-TODO: { local $TODO = 'not yet implemented';
-my $x = eval { $d->THIRTYSECOND };
-is $x, 'ts', 'THIRTYSECOND';
-$x = eval { $d->SIXTYFOURTH };
-is $x, 'sf', 'SIXTYFOURTH';
+my @v = (
+    [qw(WHOLE         _1ST wn 4)],
+    [qw(HALF          _2ND hn 2)],
+    [qw(QUARTER       _4TH qn 1)],
+    [qw(EIGHTH        _8TH en 0.5)],
+    [qw(SIXTEENTH    _16TH sn 0.25)],
+    [qw(THIRTYSECOND _32ND yn 0.125)],
+    [qw(SIXTYFOURTH  _64TH xn 0.0625)],
+);
+for my $v (@v) {
+    my($m, $n, $i, $j) = @$v;
+    is $d->$m(), $i, $m;
+    is $d->$n(), $i, $n;
+    is $d->_durations->{$i}, $j, "duration=$j";
 }
 
 my $x = $d->channel;
@@ -42,10 +46,20 @@ is $x, 4, 'get default phrases';
 $x = $d->phrases(2);
 is $x, 2, 'set phrases';
 
+$x = $d->bars;
+is $x, 4, 'get default bars';
+$x = $d->bars(2);
+is $x, 2, 'set bars';
+
 $x = $d->beats;
 is $x, 4, 'get default beats';
 $x = $d->beats(2);
 is $x, 2, 'set beats';
+
+$x = $d->swing;
+is $x, 0, 'no swing set';
+$x = $d->swing(1);
+is $x, 1, 'swing set';
 
 $x = $d->file;
 is $x, 'Drummer.mid', 'get default file';
@@ -146,7 +160,7 @@ $x = $d->backbeat_rhythm(-beat => 3, -fill => 1);
 is $x, 'n35,n42', 'backbeat_rhythm 3 fill';
 
 $d->patterns;
-$x = $d->patterns(1);
+$x = $d->patterns(0);
 is $x, undef, 'get unknown pattern is undef';
 my $y = sub { $d->note($d->EIGHTH, $d->strike) };
 $x = $d->patterns('y', $y);
@@ -155,23 +169,25 @@ $x = $d->patterns('y fill', $y);
 is_deeply $x, $y, 'set y fill pattern';
 
 $x = eval { $d->beat };
-ok $x, 'random beat';
+ok $x, 'beat';
 $x = eval { $d->fill };
-ok $x, 'random fill';
+like $x, qr/ fill$/, 'fill';
 $x = eval { $d->beat(-name => 'y') };
 is $x, 'y', 'named y beat';
 $x = eval { $d->beat(-type => 'fill') };
-like $x, qr/ fill$/, 'type';
+like $x, qr/ fill$/, 'fill';
 $x = eval { $d->beat(-name => 'y', -type => 'fill') };
 is $x, 'y fill', 'named fill';
-$x = eval { $d->beat(-last => 1) };
-ok $x ne 1, 'last unknown beat';
 $x = eval { $d->beat(-last => 'y') };
-ok $x ne 'y', 'last known beat';
+isnt $x, 'y', 'last known beat';
 $x = eval { $d->beat(-last => 'y fill') };
 isnt $x, 'y fill', 'last known fill';
 
 $x = $d->write;
 ok $x eq 'Drummer.mid' && -e $x, 'write';
+unlink $x;
+ok !-e $x, 'removed';
 $x = $d->write('Gene-Krupa.mid');
 ok $x eq 'Gene-Krupa.mid' && -e $x, 'named write';
+unlink $x;
+ok !-e $x, 'removed';

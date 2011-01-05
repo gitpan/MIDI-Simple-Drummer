@@ -3,18 +3,23 @@ use strict;
 use warnings;
 use MIDI::Simple::Drummer;
 my $d = MIDI::Simple::Drummer->new(
-    -bpm     => shift || 111,
+    -bpm     => shift || 100,
     -volume  => shift || 100,
-#    -phrases => shift || 8,
-#    -beats   => shift || 3,
+    -phrases => shift || 4,
+    -bars     => shift || 4,
+    -swing   => shift || 0,
 );
 $d->kick('Bass Drum 1');
-$d->count_in(2);
-for my $p (1 .. $d->phrases) {
-    for my $p (1 .. $d->beats) {
-        $d->note($d->EIGHTH, $d->backbeat_rhythm(-beat => $p));
+$d->count_in;
+for my $i (1 .. $d->phrases * $d->bars) {
+    if ($d->swing) {
+        $d->note($d->TRIPLET_EIGHTH, $d->backbeat_rhythm(-beat => $i));
+        $d->rest($d->TRIPLET_EIGHTH);
+        $d->note($d->TRIPLET_EIGHTH, $d->tick);
+    }
+    else {
+        $d->note($d->EIGHTH, $d->backbeat_rhythm(-beat => $i));
         $d->note($d->EIGHTH, $d->tick);
-#        $d->note($d->EIGHTH, $d->tick);
     }
 }
 $d->write("$0.mid");

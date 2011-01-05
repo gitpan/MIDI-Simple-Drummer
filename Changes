@@ -1,5 +1,13 @@
 Revision history for MIDI-Simple-Drummer
 
+0.01 2011.01.04
+    - Added rhythm metric attributes called bars() and swing().
+    - It didn't mean a thing when it didn't have that swing. o/` Jazz.pm
+    - Made tests and an example jazz drummer.
+    - Updated the other example programs.
+    - Updated POD and comments.
+    - Removed API.pod.
+
 0.00_23 2010.06.19
     - How about a Makefile.PL to go with the distribution? Eh?
 
