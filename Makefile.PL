@@ -4,30 +4,33 @@ use warnings;
 
 
 
-use ExtUtils::MakeMaker 6.31;
+use ExtUtils::MakeMaker 6.30;
 
 
 
 my %WriteMakefileArgs = (
-  'ABSTRACT' => 'Glorified metronome',
-  'AUTHOR' => 'Gene Boggs <gene@cpan.org>',
-  'BUILD_REQUIRES' => {
-    'Test::More' => '0'
+  "ABSTRACT" => "Glorified metronome",
+  "AUTHOR" => "Gene Boggs <gene\@cpan.org>",
+  "BUILD_REQUIRES" => {
+    "Test::More" => 0
   },
-  'CONFIGURE_REQUIRES' => {
-    'ExtUtils::MakeMaker' => '6.31'
+  "CONFIGURE_REQUIRES" => {
+    "ExtUtils::MakeMaker" => "6.30"
   },
-  'DISTNAME' => 'MIDI-Simple-Drummer',
-  'EXE_FILES' => [],
-  'LICENSE' => 'perl',
-  'NAME' => 'MIDI::Simple::Drummer',
-  'PREREQ_PM' => {
-    'MIDI::Simple' => '0',
-    'constant' => '0'
+  "DISTNAME" => "MIDI-Simple-Drummer",
+  "EXE_FILES" => [],
+  "LICENSE" => "perl",
+  "NAME" => "MIDI::Simple::Drummer",
+  "PREREQ_PM" => {
+    "MIDI::Simple" => 0,
+    "base" => 0,
+    "constant" => 0,
+    "strict" => 0,
+    "warnings" => 0
   },
-  'VERSION' => '0.0101',
-  'test' => {
-    'TESTS' => 't/*.t'
+  "VERSION" => "0.02",
+  "test" => {
+    "TESTS" => "t/*.t"
   }
 );
 

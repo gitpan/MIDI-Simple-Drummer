@@ -1,26 +1,35 @@
 package MIDI::Simple::Drummer;
-our $VERSION = '0.0101';
+our $VERSION = '0.02';
 use strict;
 use warnings;
 use MIDI::Simple;
 
 BEGIN {
-    # Create "convenience" note duration constants.
     require constant;
+
+    # Declare duration identifiers.
     my @notes = qw(w h q e s y x);
+    # Add the duration identifiers to MIDI::Simple.
+    %MIDI::Simple::Length = _set_durations(@notes);
+
+    # Create constants with maningful duration names.
     my %by_name;
     @by_name{@notes} = qw(whole half quarter eighth sixteenth thirtysecond sixtyfourth);
     my %by_number;
     @by_number{@notes} = qw(1st 2nd 4th 8th 16th 32nd 64th);
-    %MIDI::Simple::Length = _set_durations(@notes);
+
+    # Process each duration.
     for my $n (keys %MIDI::Simple::Length) {
+        # Get the duration part of the note name.
         my $name = $n =~ /([whqesyx])n$/o ? $1 : '';
         if ($name) {
+            # Create the meaningful prefix for the named constant.
             my $prefix = '';
             $prefix .= 'triplet'       if $n =~ /t\w/o;
             $prefix .= 'double_dotted' if $n =~ /^dd/o;
             $prefix .= 'dotted'        if $n =~ /^d[^d]/o;
             $prefix .= '_' if $prefix;
+
             # Add the constant accessed as $d->DOTTED_SIXTYFOURTH or $d->TRIPLET_8TH
             constant->import(uc($prefix . $by_name{$name}) => $n); # LeoNerd++
             $prefix .= '_' unless $prefix;
@@ -30,18 +39,30 @@ BEGIN {
             warn "ERROR: Unknown note value '$n' - Skipping."
         }
     }
-    sub _set_durations {  # Calculate named note durations.
+
+    sub _set_durations { # Calculate named note durations.
         my @durations = @_;
+
+        # Decalare a hash of duration values to return.
         my %duration = ();
+
+        # Set the initial duratoin.
         my $last = 'w';
+
         for my $d (@durations) {
+            # Create a MIDI::Simple note identifier.
             my $n = $d . 'n';
+
+            # Compute the durations for each note.
             $duration{$n} = $d eq $last ? 4 : $duration{$last . 'n'} / 2;
             $duration{'d'.$n} = $duration{$n} + $duration{$n} / 2;
             $duration{'dd'.$n} = $duration{'d'.$n} + $duration{$n} / 4;
             $duration{'t'.$n} = $duration{$n} / 3 * 2;
+
+            # Increment the last seen duration.
             $last = $d;
         }
+
         return %duration;
     }
 }
@@ -50,21 +71,21 @@ sub new { # Is there a drummer in the house?
     my $class = shift;
     my $self = {
         # MIDI
-        -channel => 9,
-        -volume => 100,
+        -channel => 9, # Default MIDI-perl drum channel
+        -volume => 100, # 120 max
         # Rhythm
         -accent => 30, # Volume increment
-        -bpm => 120,
+        -bpm => 120, # 1 qn = .5 seconds = 500,000 microseconds
         -phrases => 4, # Also equals measures
         -bars => 4,   # Number of measures
         -beats => 4,   # Beats per measure
-        -swing => 0,   # Triplet=1 or Even=0 time
+        -swing => 0,   # Triplet=1 or Even=0 time TODO Make this a percentage
         # The Goods[TM].
         -score => undef,
-        -file => 'Drummer.mid',
+        -file => 'Drummer.mid', # Default if not provided by the caller.
         -kit => undef,
         -patterns => undef,
-        @_
+        @_ # Capture any additional arguments provided to the constructor.
     };
     bless $self, $class;
     $self->_setup();
@@ -168,20 +189,19 @@ sub patterns { # Coderefs of patterns.
     return $self->_type('-patterns', @_);
 }
 
-# XXX This method seems ugly.
 sub _type { # Both kit and pattern access.
     my $self = shift;
     my $type = shift || return;
     if(!@_) { # If no arguments return all known types.
         return $self->{$type};
     }
-    elsif(@_ == 1) { # Return a named type.
+    elsif(@_ == 1) { # Return a named type with either name=>value or just value.
         my $i = shift;
         return wantarray
             ? ($i => $self->{$type}{$i})
             : $self->{$type}{$i};
     }
-    elsif(@_ > 1 && !(@_ % 2)) { # Add new types.
+    elsif(@_ > 1 && !(@_ % 2)) { # Add new types if given an even list.
         my %args = @_;
         my @t = ();
         while(my($i, $v) = each %args) {
@@ -195,7 +215,7 @@ sub _type { # Both kit and pattern access.
                 ? [map { $self->{$type}{$_} } @t]   # Arrayref of types.
                 : $self->{$type}{$t[0]};            # Else single type.
     }
-    else {
+    else { # Unlikely to ever be triggered.
         warn 'WARNING: Mystery arguments. Giving up.'
     }
 }
@@ -203,7 +223,9 @@ sub _type { # Both kit and pattern access.
 sub name_of { # Return instrument name(s) given kit keys.
     my $self = shift;
     my $key = shift || return;
-    return wantarray ? @{$self->kit($key)} : join ',', @{$self->kit($key)};
+    return wantarray
+        ? @{$self->kit($key)} # List of names
+        : join ',', @{$self->kit($key)}; # CSV of names
 }
 
 sub _set_get { # Internal kit access.
@@ -226,26 +248,28 @@ sub tom      { return shift->_set_get('tom', @_) }
 
 sub strike { # Return note values.
     my $self = shift;
-    my @patches = @_ ? @_ : @{$self->kit('snare')};
+    my @patches = @_ ? @_ : @{$self->kit('snare')}; # Default to snare.
+    # Build MIDI::Simple note names from the patch numbers.
     my @notes = map { 'n' . $MIDI::percussion2notenum{$_} } @patches;
     return wantarray ? @notes : join(',', @notes);
 }
-# API: Redefine this method to use a different decision than C<rand>.
 sub option_strike { # When in doubt, crash.
     my $self = shift;
-    my @patches = @_ ? @_ : @{$self->kit('crash')};
+    my @patches = @_ ? @_ : @{$self->kit('crash')}; # Default to the crash patches.
+    # API: Redefine this method to use a different decision than rand().
     return $self->strike($patches[int(rand @patches)]);
 }
 
-sub rotate { # Rotate through a list of patches. Default backbeat.
+sub rotate { # Rotate through a list of patches.
     my $self = shift;
-    my $beat = shift || 1;
-    my $patches = shift || $self->kit('backbeat');
+    my $beat = shift || 1; # Assume that we are on the first beat if none is given.
+    my $patches = shift || $self->kit('backbeat'); # Default backbeat.
     return $self->strike($patches->[$beat % @$patches]);
 }
 sub backbeat_rhythm { # AC/DC forever.
     # Rotate the backbeat with tick & post-fill strike.
     my $self = shift;
+    # Set the default parameters with an argument override.
     my %args = (
         -beat => 1,
         -fill => 0,
@@ -254,7 +278,7 @@ sub backbeat_rhythm { # AC/DC forever.
         -patches => scalar $self->kit('crash'),
         @_
     );
-    # Strike a cymbal (or the provided patches).
+    # Strike a cymbal or use the provided patches.
     my $c = $args{-beat} == 1 && $args{-fill}
         ? $self->option_strike(@{$args{-patches}})
         : $self->strike(@{$args{-tick}});
@@ -268,18 +292,21 @@ sub backbeat_rhythm { # AC/DC forever.
 sub note { return shift->{-score}->n(@_) }
 sub rest { return shift->{-score}->r(@_) }
 
-sub count_in {
+sub count_in { # And-a one, and-a two...
     my $self = shift;
-    my $bars = shift || 1;
+    my $bars = shift || 1; # Assume that we are on the first bar if none is given.
+    # Define the note to strike with the given patch. Default 'tick' patch.
     my $strike = @_ ? $self->strike(@_) : $self->tick;
     for my $i (1 .. $self->beats * $bars) {
+        # Accent if we are on the first beat.
         $self->score('V'.$self->accent) if $i % $self->beats == 1;
         $self->note($self->QUARTER(), $strike);
+        # Reset the note volume if we just played the first beat.
         $self->score('V'.$self->volume) if $i % $self->beats == 1;
     }
     return $strike;
 }
-sub metronome {
+sub metronome { # Keep time with a single patch. Default Pedal Hi-Hat.
     my $self = shift;
     return $self->count_in($self->phrases, shift || 'Pedal Hi-Hat');
 }
@@ -287,10 +314,10 @@ sub metronome {
 sub beat { # Pattern selector method.
     my $self = shift;
     my %args = (
-        -name => 0,
-        -fill => 0,
-        -last => 0,
-        -type => '',
+        -name => 0, # Provide a pattern name
+        -fill => 0, # Provide a fill pattern name
+        -last => 0, # Is this the last beat?
+        -type => '', # Is this a fill if not named in -fill?
         @_
     );
 
@@ -304,7 +331,7 @@ sub beat { # Pattern selector method.
     my $n = $args{-name} && $args{-type} && $args{-name} !~ /^.+\s+$args{-type}$/
           ? "$args{-name} $args{-type}" : $args{-name};
 
-    if(@k == 1) { # Return the only pattern if there is only one.
+    if(@k == 1) { # Return the pattern if there is only one.
         $n = $k[0];
     }
     else { # Otherwise choose a different pattern.
@@ -319,19 +346,29 @@ sub beat { # Pattern selector method.
         }
     }
 
-    # Beat it.
+    # Beat it - i.e. add the pattern to the score.
     $self->{-patterns}{$n}->($self, %args);
+    # Return the beat note.
     return $n;
 }
 sub fill {
     my $self = shift;
+    # Add the beat pattern to the score.
     return $self->beat(@_, -type => 'fill');
+}
+
+sub sync_tracks {
+    my $self = shift;
+    $self->{-score}->synch(@_);
 }
 
 sub write { # You gotta get it out there, you know. Make some buzz, Man.
     my $self = shift;
+    # Write the score to a provided file or the one already defined.
     my $file = shift || $self->{-file};
     $self->{-score}->write_score($file);
+    # Return the filename if it was created or zero if not.
+    # XXX Check file-size not existance.
     return -e $file ? $file : 0;
 }
 
@@ -389,6 +426,8 @@ MIDI::Simple::Drummer - Glorified metronome
   }
 
   # Shuffle:
+  use MIDI::Simple::Drummer;
+  my $d = MIDI::Simple::Drummer->new(-bpm => 100);
   $d->count_in;
   for(1 .. $d->phrases * $d->bars) {
     $d->note($d->TRIPLET_EIGHTH, $d->backbeat_rhythm(-beat => $_));
@@ -420,6 +459,29 @@ MIDI::Simple::Drummer - Glorified metronome
     $d->note($d->TRIPLET_SIXTEENTH, $d->snare) for 0 .. 2;
     $d->rest($d->SIXTEENTH);
     $d->note($d->EIGHTH, $d->strike('Splash Cymbal','Bass Drum 1'));
+  }
+
+  # Multi-tracking:
+  use MIDI::Simple::Drummer;
+  my $d = MIDI::Simple::Drummer->new;
+  $d->sync_tracks(
+    sub { $d->beat(-name => 'b1') },
+    sub { $d->beat(-name => 'b2') },
+  );
+  $d->write();
+  sub b1 { # tick
+    my $self = shift;
+    my %args = @_;
+    my $strike = $self->tick;
+    $self->note($self->QUARTER(), $strike) for 1 .. $self->beats;
+    return $strike;
+  }
+  sub b2 { # kick
+    my $self = shift;
+    my %args = @_;
+    my $strike = $self->kick;
+    $self->note($self->QUARTER(), $strike) for 1 .. $self->beats;
+    return $strike;
   }
 
 =head1 DESCRIPTION
@@ -502,6 +564,11 @@ MIDI channel.
 =head2 file()
 
 Name for the F<.mid> file to write.
+
+=head2 sync_tracks()
+
+Combine beats in parallel with an argument list of anonymous
+subroutines.
 
 =head2 patterns()
 
@@ -796,8 +863,6 @@ style package, to use better patches.
 
 =head1 TO DO
 
-* Multi-track ASAP!
-
 * Comprehend time signature via beat construction and keep a running
 clock/total to know where we are in time, at all times.
 
@@ -828,7 +893,7 @@ where interim changes are made, long before any CPAN release.
 
 Gene Boggs E<lt>gene@cpan.orgE<gt>
 
-Copyright 2010, Gene Boggs, All Rights Reserved.
+Copyright 2011, Gene Boggs, All Rights Reserved.
 
 =head1 LICENSE
 

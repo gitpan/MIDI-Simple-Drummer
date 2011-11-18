@@ -1,0 +1,32 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+
+use MIDI::Simple::Drummer;
+
+my $d = MIDI::Simple::Drummer->new(-file => "$0.mid");
+
+$d->patterns(b1 => \&b1);
+$d->patterns(b2 => \&b2);
+
+$d->sync_tracks(
+    sub { $d->beat(-name => 'b1') },
+    sub { $d->beat(-name => 'b2') },
+);
+
+$d->write();
+
+sub b1 { # tick
+    my $self = shift;
+    my %args = @_;
+    my $strike = $self->tick;
+    $self->note($self->QUARTER(), $strike) for 1 .. $self->beats;
+    return $strike;
+}
+sub b2 { # kick
+    my $self = shift;
+    my %args = @_;
+    my $strike = $self->kick;
+    $self->note($self->QUARTER(), $strike) for 1 .. $self->beats;
+    return $strike;
+}

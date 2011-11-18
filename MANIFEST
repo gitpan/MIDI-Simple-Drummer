@@ -9,6 +9,7 @@ eg/basics
 eg/durations
 eg/jazz-drummer
 eg/metronome
+eg/multi-track
 eg/rock-drummer
 lib/MIDI/Simple/Drummer.pm
 lib/MIDI/Simple/Drummer/Jazz.pm
@@ -17,5 +18,3 @@ t/00-load.t
 t/01-methods.t
 t/02-methods.t
 t/03-methods.t
-t/pod-coverage.t
-t/pod.t

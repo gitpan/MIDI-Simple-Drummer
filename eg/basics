@@ -10,8 +10,8 @@ use Data::Dumper;print Data::Dumper->new([
 #    $d->kit,
 #    scalar $d->kit('kick'),
 #    $d->kick,
-    $d->name_of('kick'),
-#    $d->_p2n,
+#    $d->name_of('kick'),
+    $d->_p2n,
 #    $d->pattern,
 #    $d->score,
 ])->Indent(1)->Terse(1)->Sortkeys(1)->Dump;

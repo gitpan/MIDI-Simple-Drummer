@@ -9,6 +9,9 @@ my $d = eval { MIDI::Simple::Drummer->new };
 isa_ok $d, 'MIDI::Simple::Drummer';
 ok !$@, 'created with no arguments';
 
+my $f1 = 'Drummer.mid';
+my $f2 = 'Buddy-Rich.mid';
+
 my @v = (
     [qw(WHOLE         _1ST wn 4)],
     [qw(HALF          _2ND hn 2)],
@@ -62,9 +65,9 @@ $x = $d->swing(1);
 is $x, 1, 'swing set';
 
 $x = $d->file;
-is $x, 'Drummer.mid', 'get default file';
-$x = $d->file('Buddy-Rich.mid');
-is $x, 'Buddy-Rich.mid', 'set file';
+is $x, $f1, 'get default file';
+$x = $d->file($f2);
+is $x, $f2, 'set file';
 
 $x = $d->score;
 isa_ok $x, 'MIDI::Simple', 'score';
@@ -184,10 +187,35 @@ $x = eval { $d->beat(-last => 'y fill') };
 isnt $x, 'y fill', 'last known fill';
 
 $x = $d->write;
-ok $x eq 'Drummer.mid' && -e $x, 'write';
-unlink $x;
-ok !-e $x, 'removed';
-$x = $d->write('Gene-Krupa.mid');
-ok $x eq 'Gene-Krupa.mid' && -e $x, 'named write';
-unlink $x;
-ok !-e $x, 'removed';
+ok $x eq $f1 && -e $x, 'write';
+$x = $d->write($f2);
+ok $x eq $f2 && -e $x, 'named write';
+
+# TODO sync_tracks() tests with -s
+$d = eval { MIDI::Simple::Drummer->new };
+$d->patterns(b1 => \&b1);
+$d->patterns(b2 => \&b2);
+$d->sync_tracks(
+    sub { $d->beat(-name => 'b1') },
+);
+$d->write($f1);
+$d->sync_tracks(
+    sub { $d->beat(-name => 'b1') },
+    sub { $d->beat(-name => 'b2') },
+);
+$d->write($f2);
+ok -s $f1 < -s $f2, 'multi-track';
+sub b1 { # tick
+    my $self = shift;
+    my %args = @_;
+    my $strike = $self->tick;
+    $self->note($self->QUARTER(), $strike) for 1 .. $self->beats;
+    return $strike;
+}
+sub b2 { # kick
+    my $self = shift;
+    my %args = @_;
+    my $strike = $self->kick;
+    $self->note($self->QUARTER(), $strike) for 1 .. $self->beats;
+    return $strike;
+}
