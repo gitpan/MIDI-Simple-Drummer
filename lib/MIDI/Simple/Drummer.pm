@@ -1,5 +1,5 @@
 package MIDI::Simple::Drummer;
-our $VERSION = '0.02';
+our $VERSION = '0.02_1';
 use strict;
 use warnings;
 use MIDI::Simple;
@@ -73,6 +73,7 @@ sub new { # Is there a drummer in the house?
         # MIDI
         -channel => 9, # Default MIDI-perl drum channel
         -volume => 100, # 120 max
+        -pan => 64, # L 1 - R 127
         # Rhythm
         -accent => 30, # Volume increment
         -bpm => 120, # 1 qn = .5 seconds = 500,000 microseconds
@@ -117,6 +118,12 @@ sub channel { # The general MIDI drumkit is often channel 9.
     my $self = shift;
     $self->{-channel} = shift if @_;
     return $self->{-channel}
+}
+sub pan { # (1) Left - Middle - Right (127)
+    my $self = shift;
+    $self->{-pan} = shift if @_;
+    $self->{-score}->control_change($self->{-channel}, 10, $self->{-pan});
+    return $self->{-pan}
 }
 sub bpm { # Beats per minute.
     my $self = shift;
@@ -463,25 +470,21 @@ MIDI::Simple::Drummer - Glorified metronome
 
   # Multi-tracking:
   use MIDI::Simple::Drummer;
-  my $d = MIDI::Simple::Drummer->new;
+  my $d = MIDI::Simple::Drummer->new(-file => "$0.mid");
+  $d->patterns(b1 => \&hihat);
+  $d->patterns(b2 => \&backbeat);
   $d->sync_tracks(
     sub { $d->beat(-name => 'b1') },
     sub { $d->beat(-name => 'b2') },
   );
   $d->write();
-  sub b1 { # tick
+  sub hihat { # tick
     my $self = shift;
-    my %args = @_;
-    my $strike = $self->tick;
-    $self->note($self->QUARTER(), $strike) for 1 .. $self->beats;
-    return $strike;
+    $self->note($self->EIGHTH, $self->tick) for 1 .. 2 * $self->beats;
   }
-  sub b2 { # kick
+  sub backbeat { # kick/snare
     my $self = shift;
-    my %args = @_;
-    my $strike = $self->kick;
-    $self->note($self->QUARTER(), $strike) for 1 .. $self->beats;
-    return $strike;
+    $self->note($self->QUARTER, $self->rotate($_)) for 1 .. $self->beats;
   }
 
 =head1 DESCRIPTION
@@ -519,6 +522,7 @@ Return a new C<MIDI::Simple::Drummer> instance with these arguments:
   # MIDI
   -channel => 9
   -volume  => 100
+  -pan     => 64
   # Rhythm metrics
   -accent  => 30
   -bpm     => 120
@@ -538,9 +542,16 @@ following accessor methods.
 =head2 volume()
 
   $x = $d->volume;
-  $x = $d->volume($y);
+  $d->volume($x);
 
 Return and set the volume.
+
+=head2 pan()
+
+  $x = $d->pan;
+  $d->pani($x);
+
+Return or set the pan (C<CC#10>) from 1 left to 127 right.
 
 =head2 bpm()
 
@@ -893,7 +904,7 @@ where interim changes are made, long before any CPAN release.
 
 Gene Boggs E<lt>gene@cpan.orgE<gt>
 
-Copyright 2011, Gene Boggs, All Rights Reserved.
+Copyright 2012, Gene Boggs, All Rights Reserved.
 
 =head1 LICENSE
 

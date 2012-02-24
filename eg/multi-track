@@ -6,8 +6,8 @@ use MIDI::Simple::Drummer;
 
 my $d = MIDI::Simple::Drummer->new(-file => "$0.mid");
 
-$d->patterns(b1 => \&b1);
-$d->patterns(b2 => \&b2);
+$d->patterns(b1 => \&hihat);
+$d->patterns(b2 => \&backbeat);
 
 $d->sync_tracks(
     sub { $d->beat(-name => 'b1') },
@@ -16,17 +16,17 @@ $d->sync_tracks(
 
 $d->write();
 
-sub b1 { # tick
+sub hihat { # tick
     my $self = shift;
-    my %args = @_;
-    my $strike = $self->tick;
-    $self->note($self->QUARTER(), $strike) for 1 .. $self->beats;
-    return $strike;
+    for (1 .. 2 * $self->beats) {
+        $self->pan(75);
+        $self->note($self->EIGHTH, $self->tick);
+    }
 }
-sub b2 { # kick
+sub backbeat { # kick/snare
     my $self = shift;
-    my %args = @_;
-    my $strike = $self->kick;
-    $self->note($self->QUARTER(), $strike) for 1 .. $self->beats;
-    return $strike;
+    for (1 .. $self->beats) {
+        $self->pan(64);
+        $self->note($self->QUARTER, $self->rotate($_));
+    }
 }

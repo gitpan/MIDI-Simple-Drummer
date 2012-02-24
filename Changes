@@ -1,5 +1,13 @@
 Revision history for MIDI-Simple-Drummer
 
+0.02_1 2012.02.23
+    - Added MIDI panning (CC#10).
+
+0.0201 2012.02.05
+    - Updated copyright year.
+    - Added M-S-D-Rudiments module.
+    - Add tests for Rudiments.
+
 0.02 2011.11.17
     - Added multi-track capability, testing and POD enhancement.
     - Added "explicit" in-line comments for the misunderstanding source-reader.

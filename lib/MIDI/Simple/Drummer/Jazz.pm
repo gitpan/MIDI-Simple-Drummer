@@ -1,5 +1,5 @@
 package MIDI::Simple::Drummer::Jazz;
-our $VERSION = '0.01';
+our $VERSION = '0.0101';
 use strict;
 use warnings;
 use base 'MIDI::Simple::Drummer';
@@ -139,20 +139,6 @@ L<MIDI::Simple::Drummer>.
 
 =head1 METHODS
 
-=head2 _default_kit()
-
-  my $kit = $self->_default_kit();
-
-Return a hash-reference of named code-references, that define the
-patches we can play.
-
-=head2 _default_patterns()
-
-  my $patterns = $self->_default_patterns();
-
-Return a hash-reference of named code-references, that define the
-patterns we can play.
-
 =head2 ride1(), ride2(), bell()
 
 Strike (or set) the rides, individually.  By default, these are the
@@ -170,7 +156,7 @@ L<MIDI::Simple::Drummer>
 
 Gene Boggs E<lt>gene@cpan.orgE<gt>
 
-Copyright 2010, Gene Boggs, All Rights Reserved.
+Copyright 2012, Gene Boggs, All Rights Reserved.
 
 =head1 LICENSE
 

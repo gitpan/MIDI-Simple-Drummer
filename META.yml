@@ -7,7 +7,7 @@ build_requires:
 configure_requires:
   ExtUtils::MakeMaker: 6.30
 dynamic_config: 0
-generated_by: 'Dist::Zilla version 4.300000, CPAN::Meta::Converter version 2.112150'
+generated_by: 'Dist::Zilla version 4.300007, CPAN::Meta::Converter version 2.120351'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -19,4 +19,7 @@ requires:
   constant: 0
   strict: 0
   warnings: 0
-version: 0.02
+resources:
+  bugtracker: https://rt.cpan.org/Public/Dist/Display.html?Name=MIDI-Simple-Drummer
+  repository: https://github.com/ology/Music/tree/master/MIDI-Simple-Drummer
+version: 0.02_1

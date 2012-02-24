@@ -1,5 +1,5 @@
 package MIDI::Simple::Drummer::Rock;
-our $VERSION = '0.01';
+our $VERSION = '0.0101';
 use strict;
 use warnings;
 use base 'MIDI::Simple::Drummer';
@@ -117,15 +117,6 @@ MIDI::Simple::Drummer::Rock - Rock drum grooves
 This package contains a collection of patterns, loaded by
 L<MIDI::Simple::Drummer>.
 
-=head1 METHODS
-
-=head2 _default_patterns()
-
-  my $patterns = $self->_default_patterns();
-
-Return a hash-reference of named code-references, that define the
-patterns we can play.
-
 =head1 TO DO
 
 * Make cooler fills, Man.
@@ -138,7 +129,7 @@ L<MIDI::Simple::Drummer>
 
 Gene Boggs E<lt>gene@cpan.orgE<gt>
 
-Copyright 2010, Gene Boggs, All Rights Reserved.
+Copyright 2012, Gene Boggs, All Rights Reserved.
 
 =head1 LICENSE
 
