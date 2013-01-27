@@ -106,34 +106,45 @@ sub _default_patterns {
 }
 
 1;
+
 __END__
+
+=pod
+
+=head1 NAME
+
+MIDI::Simple::Drummer::Rock
+
+=head1 VERSION
+
+version 0.03
+
+=head1 DESCRIPTION
+
+This package contains a collection of common rock patterns, loaded by
+L<MIDI::Simple::Drummer>.
 
 =head1 NAME
 
 MIDI::Simple::Drummer::Rock - Rock drum grooves
 
-=head1 DESCRIPTION
-
-This package contains a collection of patterns, loaded by
-L<MIDI::Simple::Drummer>.
-
 =head1 TO DO
 
-* Make cooler fills, Man.
+* "Do some cooler fills, Man."
 
 =head1 SEE ALSO
 
-L<MIDI::Simple::Drummer>
+L<MIDI::Simple::Drummer>, the F<eg/> and F<t/> test scripts.
 
-=head1 AUTHOR AND COPYRIGHT
+=head1 AUTHOR
 
-Gene Boggs E<lt>gene@cpan.orgE<gt>
+Gene Boggs <gene@cpan.org>
 
-Copyright 2012, Gene Boggs, All Rights Reserved.
+=head1 COPYRIGHT AND LICENSE
 
-=head1 LICENSE
+This software is copyright (c) 2013 by Gene Boggs.
 
-This program is free software; you can redistribute or modify it
-under the same terms as Perl itself.
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
 
 =cut

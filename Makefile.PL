@@ -23,12 +23,13 @@ my %WriteMakefileArgs = (
   "NAME" => "MIDI::Simple::Drummer",
   "PREREQ_PM" => {
     "MIDI::Simple" => 0,
+    "Music::Duration" => 0,
     "base" => 0,
     "constant" => 0,
     "strict" => 0,
     "warnings" => 0
   },
-  "VERSION" => "0.02_1",
+  "VERSION" => "0.03",
   "test" => {
     "TESTS" => "t/*.t"
   }

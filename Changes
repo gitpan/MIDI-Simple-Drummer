@@ -1,23 +1,37 @@
 Revision history for MIDI-Simple-Drummer
 
+0.03      2013-01-27 10:23:15 America/Los_Angeles
+    - Added time signature support and tests.
+    - Replaced duration computaton with the Music:Duration module.
+    - Added Changes versioning plugin.
+    - Added spellchecking plugin.
+    - Removed niave swing() method until true wisdom emerges.
+    - Made the eg/basics script more user-friendly.
+    - Flesh-out panning features in the Rudiments module.
+    - Added a couple more rudiments and better tests.
+
 0.02_1 2012.02.23
     - Added MIDI panning (CC#10).
+
+ ^^^ version mix-up vvv
 
 0.0201 2012.02.05
     - Updated copyright year.
     - Added M-S-D-Rudiments module.
-    - Add tests for Rudiments.
+    - Added tests for Rudiments.
+
+ ^^^ version mix-up vvv
 
 0.02 2011.11.17
     - Added multi-track capability, testing and POD enhancement.
-    - Added "explicit" in-line comments for the misunderstanding source-reader.
+    - Added explicit in-line comments.
 
 0.0101 2011.01.05
     - Refactored with Dist::Zilla.
 
 0.01 2011.01.04
     - Added rhythm metric attributes called bars() and swing().
-    - It didn't mean a thing when it didn't have that swing. o/` Jazz.pm
+    - It didn't mean a thing when it didn't have that swing.
     - Made tests and an example jazz drummer.
     - Updated the other example programs.
     - Updated POD and comments.
@@ -116,3 +130,4 @@ Revision history for MIDI-Simple-Drummer
 0.00_01 Sat Oct 10, 2009
     - First version, released on an unsuspecting world by Module::Starter.
     - Made it live in the possible now.
+

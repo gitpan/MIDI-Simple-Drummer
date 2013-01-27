@@ -1,7 +1,7 @@
 #!perl -T
 use strict;
 use warnings;
-use Test::More 'no_plan';
+use Test::More;
 
 BEGIN { use_ok('MIDI::Simple::Drummer') }
 
@@ -12,6 +12,7 @@ ok !$@, 'created with no arguments';
 my $f1 = 'Drummer.mid';
 my $f2 = 'Buddy-Rich.mid';
 
+# Define test durations.
 my @v = (
     [qw(WHOLE         _1ST wn 4)],
     [qw(HALF          _2ND hn 2)],
@@ -21,6 +22,8 @@ my @v = (
     [qw(THIRTYSECOND _32ND yn 0.125)],
     [qw(SIXTYFOURTH  _64TH xn 0.0625)],
 );
+
+# Test durations.
 for my $v (@v) {
     my($m, $n, $i, $j) = @$v;
     is $d->$m(), $i, $m;
@@ -28,6 +31,7 @@ for my $v (@v) {
     is $d->_durations->{$i}, $j, "duration=$j";
 }
 
+# Test accessors...
 my $x = $d->channel;
 is $x, 9, 'get default channel';
 $x = $d->channel(2);
@@ -59,10 +63,15 @@ is $x, 4, 'get default beats';
 $x = $d->beats(2);
 is $x, 2, 'set beats';
 
-$x = $d->swing;
-is $x, 0, 'no swing set';
-$x = $d->swing(1);
-is $x, 1, 'swing set';
+$x = $d->divisions;
+is $x, 4, 'get default divisions';
+$x = $d->divisions(2);
+is $x, 2, 'set divisions';
+
+$x = $d->signature;
+is $x, '4/4', 'get default signature';
+$x = $d->signature('7/4');
+is $x, '7/4', 'set signature';
 
 $x = $d->file;
 is $x, $f1, 'get default file';
@@ -120,11 +129,19 @@ is $x, 'n56', 'option_strike patch';
 $x = $d->option_strike('Cowbell', 'Tambourine');
 like $x, qr/n5[46]/, 'option_strike options';
 
+# Test the metronome.
 $d = eval { MIDI::Simple::Drummer->new };
+$d->metronome;
+$d = eval { MIDI::Simple::Drummer->new(-signature => '3/4') };
+$x = $d->beats;
+is $x, 3, 'get beats';
+$x = $d->divisions;
+is $x, 4, 'get divisions';
 $d->metronome;
 $x = grep { $_->[0] eq 'note' } @{$d->score->{Score}};
 ok $x == $d->beats * $d->phrases, 'metronome';
 
+# Test the machinations.
 $d = eval { MIDI::Simple::Drummer->new };
 $d->count_in;
 $x = grep { $_->[0] eq 'note' } @{$d->score->{Score}};
@@ -171,27 +188,28 @@ is_deeply $x, $y, 'set y pattern';
 $x = $d->patterns('y fill', $y);
 is_deeply $x, $y, 'set y fill pattern';
 
-$x = eval { $d->beat };
+$x = $d->beat;
 ok $x, 'beat';
-$x = eval { $d->fill };
+$x = $d->fill;
 like $x, qr/ fill$/, 'fill';
-$x = eval { $d->beat(-name => 'y') };
+$x = $d->beat(-name => 'y');
 is $x, 'y', 'named y beat';
-$x = eval { $d->beat(-type => 'fill') };
+$x = $d->beat(-type => 'fill');
 like $x, qr/ fill$/, 'fill';
-$x = eval { $d->beat(-name => 'y', -type => 'fill') };
+$x = $d->beat(-name => 'y', -type => 'fill');
 is $x, 'y fill', 'named fill';
-$x = eval { $d->beat(-last => 'y') };
+$x = $d->beat(-last => 'y');
 isnt $x, 'y', 'last known beat';
-$x = eval { $d->beat(-last => 'y fill') };
+$x = $d->beat(-last => 'y fill');
 isnt $x, 'y fill', 'last known fill';
 
+# Write the score to disk.
 $x = $d->write;
 ok $x eq $f1 && -e $x, 'write';
 $x = $d->write($f2);
 ok $x eq $f2 && -e $x, 'named write';
 
-# TODO sync_tracks() tests with -s
+# TODO sync_tracks() tests with score notes instead.
 $d = eval { MIDI::Simple::Drummer->new };
 $d->patterns(b1 => \&b1);
 $d->patterns(b2 => \&b2);
@@ -219,3 +237,5 @@ sub b2 { # kick
     $self->note($self->QUARTER(), $strike) for 1 .. $self->beats;
     return $strike;
 }
+
+done_testing();

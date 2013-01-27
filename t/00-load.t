@@ -1,8 +1,12 @@
 #!perl -T
 use strict;
 use warnings;
-use Test::More 'no_plan';
-BEGIN { use_ok( 'MIDI::Simple::Drummer' ) }
-BEGIN { use_ok( 'MIDI::Simple::Drummer::Rock' ) }
-BEGIN { use_ok( 'MIDI::Simple::Drummer::Jazz' ) }
-diag("Testing Drummer $MIDI::Simple::Drummer::VERSION, Perl $], $^X");
+use Test::More;
+BEGIN {
+    use_ok 'MIDI::Simple::Drummer';
+    use_ok 'MIDI::Simple::Drummer::Rock';
+    use_ok 'MIDI::Simple::Drummer::Jazz';
+    use_ok 'MIDI::Simple::Drummer::Rudiments';
+}
+diag "MIDI::Simple::Drummer $MIDI::Simple::Drummer::VERSION, Perl $], $^X";
+done_testing();

@@ -7,7 +7,6 @@ use base 'MIDI::Simple::Drummer';
 sub _setup {
     my $self = shift;
     $self->SUPER::_setup(@_);
-    $self->swing(1); # XXX Naive
 }
 
 sub _default_patterns {
@@ -109,7 +108,7 @@ sub _default_patterns {
     };
 }
 
-# Kit access
+# Custom kit access
 sub _default_kit {
     my $self = shift;
     return {
@@ -126,16 +125,29 @@ sub bell  { return shift->_set_get('bell', @_) }
 sub pedal { return shift->_set_get('pedal', @_) }
 
 1;
+
 __END__
+
+=pod
+
+=head1 NAME
+
+MIDI::Simple::Drummer::Jazz
+
+=head1 VERSION
+
+version 0.03
+
+=head1 DESCRIPTION
+
+This package contains a collection of triplet based patterns, loaded by
+L<MIDI::Simple::Drummer>.
+
+Additionally, the methods below are available.
 
 =head1 NAME
 
 MIDI::Simple::Drummer::Jazz - Jazz drum grooves
-
-=head1 DESCRIPTION
-
-This package contains a collection of patterns, loaded by
-L<MIDI::Simple::Drummer>.
 
 =head1 METHODS
 
@@ -150,17 +162,17 @@ kit rides.  Imagine that!
 
 =head1 SEE ALSO
 
-L<MIDI::Simple::Drummer>
+L<MIDI::Simple::Drummer>, the F<eg/> and F<t/> test scripts.
 
-=head1 AUTHOR AND COPYRIGHT
+=head1 AUTHOR
 
-Gene Boggs E<lt>gene@cpan.orgE<gt>
+Gene Boggs <gene@cpan.org>
 
-Copyright 2012, Gene Boggs, All Rights Reserved.
+=head1 COPYRIGHT AND LICENSE
 
-=head1 LICENSE
+This software is copyright (c) 2013 by Gene Boggs.
 
-This program is free software; you can redistribute or modify it
-under the same terms as Perl itself.
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
 
 =cut
