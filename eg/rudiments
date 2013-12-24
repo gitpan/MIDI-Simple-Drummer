@@ -1,0 +1,14 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+
+use MIDI::Simple::Drummer::Rudiments;
+
+my $d = MIDI::Simple::Drummer::Rudiments->new(
+    -volume => 50,
+    -bpm    => 70,
+);
+$d->count_in;
+$d->snare('Electric Snare');
+$d->beat(-name => 10);
+$d->write("$0.mid");

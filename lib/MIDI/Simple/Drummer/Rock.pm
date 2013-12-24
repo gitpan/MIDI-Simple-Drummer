@@ -1,8 +1,21 @@
 package MIDI::Simple::Drummer::Rock;
-our $VERSION = '0.0101';
+BEGIN {
+  $MIDI::Simple::Drummer::Rock::AUTHORITY = 'cpan:GENE';
+}
+our $VERSION = '0.02';
 use strict;
 use warnings;
 use base 'MIDI::Simple::Drummer';
+
+sub new {
+    my $self = shift;
+    $self->SUPER::new(
+        -patch => 1, # Standard
+        -power => 0,
+        -room  => 0,
+        @_
+    );
+}
 
 # "Quater-note beat" Qn tick. Cym on 1. Kick 1&3. Snare 2&4.
 sub _quarter {
@@ -111,18 +124,24 @@ __END__
 
 =pod
 
+=encoding UTF-8
+
 =head1 NAME
 
 MIDI::Simple::Drummer::Rock
 
 =head1 VERSION
 
-version 0.03
+version 0.04
 
 =head1 DESCRIPTION
 
 This package contains a collection of common rock patterns, loaded by
 L<MIDI::Simple::Drummer>.
+
+The constructor can be provided with a specific patch number (default 1
+"Standard Kit") or the arguments "-power => 1" or "-room => 1" to use the
+alternate rock kits.
 
 =head1 NAME
 

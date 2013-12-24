@@ -1,7 +1,10 @@
 package MIDI::Simple::Drummer;
+BEGIN {
+  $MIDI::Simple::Drummer::AUTHORITY = 'cpan:GENE';
+}
 # ABSTRACT: Glorified metronome
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 use strict;
 use warnings;
@@ -21,8 +24,7 @@ BEGIN {
         x => { number => 64, ordinal => '64th', name => 'sixtyfourth' },
     };
 
-    # Add constants DOTTED_EIGHTH, DOTTED_8TH etc.
-    # Process each duration.
+    # Add constants for each known duration.
     for my $n (keys %MIDI::Simple::Length) {
         # Get the duration part of the note name.
         my $name = $n =~ /([whqesyx])n$/o ? $1 : '';
@@ -37,20 +39,17 @@ BEGIN {
 
             # Add name-based duration.
             my $key = uc($prefix . DIVISION->{$name}{name});
-#warn "$key => $n (".DIVISION->{$name}{number}.")\n";
             constant->import($key => $n); # LeoNerd++ clue
             # Add a _prefix for numeric duration constants.
             $prefix .= '_' unless $prefix;
             # Add number-based duration.
             $key = uc($prefix . DIVISION->{$name}{ordinal});
-#warn "$key => $n (".DIVISION->{$name}{number}.")\n";
             constant->import($key => $n);
         }
         else {
             warn "ERROR: Unknown note value '$n' - Skipping."
         }
     }
-#use Data::Dumper;warn Data::Dumper->new([\%MIDI::Simple::Length])->Indent(1)->Terse(1)->Sortkeys(1)->Dump;
 }
 
 sub new { # Is there a drummer in the house?
@@ -59,8 +58,15 @@ sub new { # Is there a drummer in the house?
     my $self  = {
         # MIDI
         -channel    => 9,   # MIDI-perl drum channel
+        -patch      => 0,   # The drum kit
         -volume     => 100, # 120 max
-        -pan        => 64,  # L 1 - R 127
+        -pan        => 64,  # 0L .. 64M .. 127R
+        -pan_width  => 0,   # 0 .. 64 Center
+        -reverb     => 20,  # Effect 0-127
+        -chorus     => 0,   # "
+        -power      => 0,   # Rock kit
+        -room       => 0,   # "
+        -brushes    => 0,   # "
         # Rhythm
         -accent     => 30,  # Volume increment
         -bpm        => 120, # 1 qn = .5 seconds = 500,000 microseconds
@@ -116,6 +122,26 @@ sub _setup { # Where's my roadies, Man?
         }
     }
 
+    # Set effects.
+    $self->reverb;
+    $self->chorus;
+    $self->pan_width;
+
+    # Use the requested kit.
+    if ($self->{-room}) {
+        $self->patch(9);
+    }
+    elsif ($self->{-power}) {
+        $self->patch(17);
+    }
+    elsif ($self->{-brushes}) {
+        $self->patch(41);
+    }
+    else {
+        # Set to the assigned -patch.
+        $self->patch;
+    }
+
     return $self;
 }
 
@@ -130,11 +156,34 @@ sub channel { # The general MIDI drumkit is often channel 9.
     $self->{-channel} = shift if @_;
     return $self->{-channel};
 }
-sub pan { # (1) Left - Middle - Right (127)
+sub patch { # Drum kit
+    my $self = shift;
+    $self->{-patch} = shift if @_;
+    $self->{-score}->patch_change($self->{-channel}, $self->{-patch});
+    return $self->{-patch};
+}
+sub reverb { # [0 .. 127]
+    my $self = shift;
+    $self->{-reverb} = shift if @_;
+    $self->{-score}->control_change($self->{-channel}, 91, $self->{-reverb});
+    return $self->{-reverb};
+}
+sub chorus { # [0 .. 127]
+    my $self = shift;
+    $self->{-chorus} = shift if @_;
+    $self->{-score}->control_change($self->{-channel}, 93, $self->{-chorus});
+    return $self->{-chorus};
+}
+sub pan { # [0 Left-Middle-Right 127]
     my $self = shift;
     $self->{-pan} = shift if @_;
     $self->{-score}->control_change($self->{-channel}, 10, $self->{-pan});
     return $self->{-pan};
+}
+sub pan_width { # [0 .. 64] from center
+    my $self = shift;
+    $self->{-pan_width} = shift if @_;
+    return $self->{-pan_width};
 }
 sub bpm { # Beats per minute
     my $self = shift;
@@ -197,6 +246,14 @@ sub score { # The MIDI::Simple score with no-op-ability
     $self->{-score}->noop($_) for @_;
 
     return $self->{-score};
+}
+
+sub accent_note { # Accent a single note.
+    my $self = shift;
+    my $note = shift;
+    $self->score('V' . $self->accent); # Accent!
+    $self->note($note, $self->strike);
+    $self->score('V' . $self->volume); # Reset the note volume.
 }
 
 # API: Subclass and redefine to emit nuance.
@@ -358,7 +415,8 @@ sub backbeat_rhythm { # AC/DC forever
 sub note {
     my $self = shift;
 #use Data::Dumper;warn Data::Dumper->new([@_])->Indent(1)->Terse(1)->Sortkeys(1)->Dump;
- return $self->{-score}->n(@_) }
+    return $self->{-score}->n(@_)
+}
 sub rest { return shift->{-score}->r(@_) }
 
 sub count_in { # And-a one, and-a two...
@@ -502,13 +560,15 @@ __END__
 
 =pod
 
+=encoding UTF-8
+
 =head1 NAME
 
 MIDI::Simple::Drummer - Glorified metronome
 
 =head1 VERSION
 
-version 0.03
+version 0.04
 
 =head1 SYNOPSIS
 
@@ -579,7 +639,7 @@ version 0.03
 =head1 DESCRIPTION
 
 This is a "robotic" drummer that provides algorithmic methods to make beats,
-rhythms, noise, what have you.
+rhythms, noise, what have you.  It is also a glorified metronome.
 
 This is not a traditional "drum machine" that is controlled in a mechanical
 or "arithmetic" sense.  It is a "sufficiently intelligent" drummer, with which
@@ -587,21 +647,21 @@ you can practice, improvise, compose, record and experiment.
 
 The "beats" are entirely constructed with Perl, and as such, any algorithmic
 procedure can be used to generate the phrases - Bayesian stochastic,
-evolutionary game simulation, L-system, recursive descent grammar, Markov,
+evolutionary game simulation, L-system, recursive descent grammar, Markov chain,
 L<Quantumm::Whatever>...
 
 Note that B<you>, the programmer (and de facto drummer), should know what the
 kit elements are named and what the patterns do.  For these things, "Use The
 Source, Luke."  Also, check out the included style sub-classes, the F<eg/*>
-files and the F<*.mid> files they produce.
+files (and the F<*.mid> files they produce).
 
-So the default drum kit is the B<exciting>, general MIDI channel 9 (but
-sometimes 10).  Fortunately, you can import the F<.mid> file into your new
-fangled DAW with auto-separated tracks of "virtual instruments." B<Harumph!>
+The default drum kit is the B<exciting>, General MIDI Kit.  Fortunately, you can
+import the F<.mid> file into your new fangled DAW with auto-separated tracks of
+"virtual instruments." B<Harumph!>
 
 =head1 NAME
 
-MIDI::Simple::Drummer - Glorified metronome
+MIDI::Simple::Drummer - An algorithmic MIDI drummer
 
 =head1 METHODS
 
@@ -614,7 +674,13 @@ Return a new C<MIDI::Simple::Drummer> instance with these default arguments:
   # MIDI
   -channel   => 9
   -volume    => 100
-  -pan       => 64
+  -pan_width => 64
+  -patch     => 0
+  -reverb    => 20
+  -chorus    => 0
+  -brushes   => 0
+  -power     => 0
+  -room      => 0
   # Rhythm metrics
   -accent    => 30
   -bpm       => 120
@@ -629,15 +695,15 @@ Return a new C<MIDI::Simple::Drummer> instance with these default arguments:
   -patterns  => {}
   -score     => MIDI::Simple->new_score
 
-These arguments can all be overridden with the OO constuctor or accessors of the
-same name.
+These arguments can all be overridden in the constuctor or accessors of the same
+name.
 
-=head2 volume(), pan(), bpm()
+=head2 volume(), pan(), pan_width(), bpm()
 
   $x = $d->method;
   $d->method($x);
 
-Return and set the volume, pan and beats-per-minute methods.
+Return and set the volume, pan, pan_width and beats-per-minute methods.
 
 MIDI pan (C<CC#10>) goes from F<1> left to F<127> right.  That puts the middle
 at F<63>.
@@ -664,9 +730,23 @@ They are just numbers, not objects or lists.
 Get or set the string ratio of B<-beats> over B<-divisions>.  By default this is
 not defined, allowing unbridled free-form expression.
 
+=head2 div_name()
+
+The name of the denominator of the time signature.
+
+=head2 patch()
+
+The drum kit.
+
+1: Standard. 33: Jazz. 41: Brushes. Etc.
+
 =head2 channel()
 
 Get or set the MIDI channel.
+
+=head2 chorus(), reverb()
+
+Effects 0 (off) to 127 (full)
 
 =head2 file()
 
@@ -688,7 +768,13 @@ Return or set known style patterns.
   $x = $d->score('V127');
 
 Return or set the L<MIDI::Simple/score> if provided as the first argument.  If
-there are any other arguments, they are set as score no-ops.
+there are any other arguments, they are treated as MIDI score settings.
+
+=head2 accent_note()
+
+  $x = $d->accent_note($d->EIGHTH);
+
+Accent a single note.
 
 =head2 accent()
 
@@ -739,7 +825,7 @@ Add a rest to the score.  This is a pass-through to L<MIDI::Simple/r>.
   $d->metronome;
   $d->metronome('Mute Triangle');
 
-Add beats * phases of the C<Pedal Hi-Hat>, unless another patch is provided.
+Add (beats * phrases) of the C<Pedal Hi-Hat>, unless another patch is provided.
 
 =head2 count_in()
 
@@ -747,10 +833,9 @@ Add beats * phases of the C<Pedal Hi-Hat>, unless another patch is provided.
   $d->count_in(2);
   $d->count_in(1, 'Side Stick');
 
-And a-one and a-two and a-one, two, three!E<lt>E<sol>Lawrence WelkE<gt>
-..11E<lt>E<sol>FZE<gt>
+And a-one and a-two!E<lt>E<sol>Lawrence WelkE<gt> ..11E<lt>E<sol>FZE<gt>
 
-If No arguments are provided, the C<Closed Hi-Hat> is used.
+If No arguments are provided, the C<Closed Hi-Hat> patch is used.
 
 =head2 rotate()
 
@@ -765,13 +850,23 @@ backbeat patches)
 
   $x = $d->backbeat_rhythm;
   $x = $d->backbeat_rhythm(-beat => $y);
-  $x = $d->backbeat_rhythm(-fill => $z);
-  $x = $d->backbeat_rhythm(-patches => ['Cowbell','Hand Clap']);
   $x = $d->backbeat_rhythm(-backbeat => ['Bass Drum 1','Electric Snare']);
+  $x = $d->backbeat_rhythm(-patches => ['Cowbell','Hand Clap']);
   $x = $d->backbeat_rhythm(-tick => ['Claves']);
+  $x = $d->backbeat_rhythm(-fill => $z);
 
-Return the rotating C<backbeat> with either the C<tick> or an option patch
-(default crashes), if it's the first beat and we just filled.
+Add a rotating backbeat to the score.
+
+Arguments:
+
+B<beat> is the beat we are on.
+B<backbeat> is the list of patches to use instead of the stock bass and snare.
+B<patches> is a list of possible patches to use instead of the crash cymbals.
+B<tick> is the patch to use instead of the closed hi-hat.
+B<fill> is the fill pattern we last played.
+
+Two patches in the B<backbeat> are said to alternate, as in 4/4 time.  Three
+patches rotate in 3/4 time, etc.
 
 =head2 beat()
 
@@ -798,14 +893,16 @@ For C<-type =E<gt> 'fill'>, we append a named fill to the MIDI score.
 
 =head2 fill()
 
-This is an alias to the C<beat> method with
-C<-type =E<gt> 'fill'> added.
+This is an alias to C<beat(-type =E<gt> 'fill')>.
 
 =head2 patterns()
 
   $x = $d->patterns;
   $x = $d->patterns('rock_1');
-  @x = $d->patterns(paraflamaramadiddle => \&code, 'foo fill' => \&foo_fill);
+  @x = $d->patterns(
+    paraflamaramadiddle => \&paraflamaramadiddle,
+    'foo fill' => \&foo_fill,
+  );
 
 Return or set the code references to the named patterns.  If no argument is
 given, all the known patterns are returned.
@@ -904,7 +1001,7 @@ C<kick> and C<snare> patches.
 These are meant to avoid literal strings and the need to remember and type the
 relevant MIDI variables.
 
-=head2 WHOLE or 1st
+=head2 WHOLE or _1st
 
   $x = $d->WHOLE;
   $x = $d->_1st;
@@ -963,6 +1060,8 @@ The I<MIDI::Simple::Drummer::*> styles, which you can make (and upload).
 
 L<MIDI::Simple> itself, of course.
 
+L<https://en.wikipedia.org/wiki/General_MIDI#Percussion>
+
 L<http://maps.google.com/maps?q=mike+avery+joplin> - my drum teacher.
 
 This distribution at
@@ -970,6 +1069,8 @@ L<https://github.com/ology/Music/tree/master/MIDI-Simple-Drummer>,
 where interim changes are made, long before any CPAN release.
 
 =head1 TO DO
+
+* Be smart about swing timing (e.g. $d->TRIPLET_XXXX).
 
 * Handle double and half time (via DIVISION hashref).
 

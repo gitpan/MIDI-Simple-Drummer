@@ -1,12 +1,19 @@
 package MIDI::Simple::Drummer::Jazz;
-our $VERSION = '0.0101';
+BEGIN {
+  $MIDI::Simple::Drummer::Jazz::AUTHORITY = 'cpan:GENE';
+}
+our $VERSION = '0.02';
 use strict;
 use warnings;
 use base 'MIDI::Simple::Drummer';
 
-sub _setup {
+sub new {
     my $self = shift;
-    $self->SUPER::_setup(@_);
+    $self->SUPER::new(
+        -patch   => 33, # Jazz
+        -brushes => 0,
+        @_
+    );
 }
 
 sub _default_patterns {
@@ -130,18 +137,23 @@ __END__
 
 =pod
 
+=encoding UTF-8
+
 =head1 NAME
 
 MIDI::Simple::Drummer::Jazz
 
 =head1 VERSION
 
-version 0.03
+version 0.04
 
 =head1 DESCRIPTION
 
 This package contains a collection of triplet based patterns, loaded by
 L<MIDI::Simple::Drummer>.
+
+The constructor can be provided with a specific patch number (default 33 "Jazz
+Kit") or the argument "-brushes => 1" to use the "Brush kit."
 
 Additionally, the methods below are available.
 

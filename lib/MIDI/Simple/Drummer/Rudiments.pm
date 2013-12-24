@@ -1,15 +1,23 @@
 package MIDI::Simple::Drummer::Rudiments;
+BEGIN {
+  $MIDI::Simple::Drummer::Rudiments::AUTHORITY = 'cpan:GENE';
+}
 our $VERSION = '0.02';
 use strict;
 use warnings;
 use base 'MIDI::Simple::Drummer';
 
-use constant PAN_CENTER => 63;
+use constant PAN_CENTER => 64;
 
 
-sub _setup {
+sub new {
     my $self = shift;
-    $self->SUPER::_setup(@_);
+    $self->SUPER::new(
+        -pan_width => 32, # [ 0 .. 64 ] # From center
+        -chorus    => 0,
+        -reverb    => 1,
+        @_,
+    );
 }
 
 sub _default_patterns {
@@ -64,23 +72,24 @@ sub _groups_of {
 }
 
 
-sub single_stroke_roll {
+sub single_stroke_roll { # 1
     my $self = shift;
-    my %args = @_;
     for my $beat (1 .. 8) {
-        $self->alternate_pan($beat % 2, $args{pan_width});
+        $self->alternate_pan($beat % 2, $self->pan_width);
         $self->note($self->THIRTYSECOND, $self->strike);
     }
 }
 
 
-sub single_stroke_four {
+sub single_stroke_four { # 2
     my $self = shift;
     my %args = @_;
     for my $beat (1 .. 8) {
-        $self->alternate_pan($beat % 2, $args{pan_width});
+        $self->alternate_pan($beat % 2, $self->pan_width);
         if ($beat == 4 || $beat == 8) {
+            $self->score('V'.$self->accent); # Accent!
             $self->note($self->EIGHTH, $self->strike);
+            $self->score('V'.$self->volume); # Reset the note volume.
         }
         else {
             $self->note($self->TRIPLET_SIXTEENTH, $self->strike);
@@ -89,13 +98,15 @@ sub single_stroke_four {
 }
 
 
-sub single_stroke_seven {
+sub single_stroke_seven { # 3
     my $self = shift;
     my %args = @_;
     for my $beat (1 .. 7) {
-        $self->alternate_pan($beat % 2, $args{pan_width});
+        $self->alternate_pan($beat % 2, $self->pan_width);
         if ($beat == 7) {
+            $self->score('V'.$self->accent); # Accent!
             $self->note($self->EIGHTH, $self->strike);
+            $self->score('V'.$self->volume); # Reset the note volume.
         }
         else {
             $self->note($self->TRIPLET_SIXTEENTH, $self->strike);
@@ -104,295 +115,457 @@ sub single_stroke_seven {
 }
 
 
-sub multiple_bounce_roll {
+sub multiple_bounce_roll { # 4
     my $self = shift;
     # TODO Set $multiple and then do a multi-stroke below.
+    # TODO Set a random $multiple each X number of times.
 }
 
 
-sub triple_stroke_roll {
+sub triple_stroke_roll { # 5
     my $self = shift;
     my %args = @_;
     for my $beat (1 .. 12) {
         # Pan after groups of three.
-        $self->alternate_pan(_groups_of($beat, 3), $args{pan_width});
+        $self->alternate_pan(_groups_of($beat, 3), $self->pan_width);
         $self->note($self->TRIPLET_SIXTEENTH, $self->strike);
     }
 }
 
 
-sub double_stroke_open_roll {
+sub double_stroke_open_roll { # 6
     my $self = shift;
     my %args = @_;
     for my $beat (1 .. 8) {
         # Pan after groups of two.
-        $self->alternate_pan(_groups_of($beat, 2), $args{pan_width});
+        $self->alternate_pan(_groups_of($beat, 2), $self->pan_width);
         $self->note($self->THIRTYSECOND, $self->strike);
     }
 }
 
 
-sub five_stroke_roll {
+sub five_stroke_roll { # 7
     my $self = shift;
-    for my $beat (1 .. $self->beats) {
+    # Start on left.
+    for my $beat (0 .. 3) {
+        $self->alternate_pan(_groups_of($beat, 2), $self->pan_width);
+        $self->note($self->THIRTYSECOND, $self->strike);
     }
+    $self->pan_left;
+    $self->accent_note($self->EIGHTH);
+
+    # Start on right.
+    for my $beat (1 .. 4) {
+        $self->alternate_pan(_groups_of($beat, 2), $self->pan_width);
+        $self->note($self->THIRTYSECOND, $self->strike);
+    }
+    $self->pan_right;
+    $self->accent_note($self->EIGHTH);
 }
 
 
-sub six_stroke_roll {
+sub six_stroke_roll { # 8
     my $self = shift;
-    for my $beat (1 .. $self->beats) {
+    # Start on left.
+    $self->pan_left;
+    $self->accent_note($self->EIGHTH);
+    for my $beat (0 .. 3) {
+        $self->alternate_pan(_groups_of($beat, 2), $self->pan_width);
+        $self->note($self->SIXTEENTH, $self->strike);
     }
+    $self->pan_right;
+    $self->accent_note($self->EIGHTH);
+
+    # Start on right.
+    $self->accent_note($self->EIGHTH);
+    for my $beat (1 .. 4) {
+        $self->alternate_pan(_groups_of($beat, 2), $self->pan_width);
+        $self->note($self->SIXTEENTH, $self->strike);
+    }
+    $self->pan_left;
+    $self->accent_note($self->EIGHTH);
 }
 
 
-sub seven_stroke_roll {
+sub seven_stroke_roll { # 9
     my $self = shift;
-    for my $beat (1 .. $self->beats) {
+    # 3 diddles
+    for my $beat (0 .. 5) {
+        $self->alternate_pan(_groups_of($beat, 2), $self->pan_width);
+        $self->note($self->TRIPLET_SIXTEENTH, $self->strike);
     }
+    $self->pan_right;
+    $self->accent_note($self->EIGHTH);
+
+    # 3 diddles
+    for my $beat (1 .. 6) {
+        $self->alternate_pan(_groups_of($beat, 2), $self->pan_width);
+        $self->note($self->TRIPLET_SIXTEENTH, $self->strike);
+    }
+    $self->pan_left;
+    $self->accent_note($self->EIGHTH);
 }
 
 
-sub nine_stroke_roll {
+sub nine_stroke_roll { # 10
     my $self = shift;
-    for my $beat (1 .. $self->beats) {
+    # 4 diddles
+    for my $beat (0 .. 7) {
+        $self->alternate_pan(_groups_of($beat, 2), $self->pan_width);
+        $self->note($self->SIXTEENTH, $self->strike);
     }
+    $self->pan_right;
+    $self->accent_note($self->EIGHTH);
+
+    # 4 diddles
+    for my $beat (1 .. 8) {
+        $self->alternate_pan(_groups_of($beat, 2), $self->pan_width);
+        $self->note($self->SIXTEENTH, $self->strike);
+    }
+    $self->pan_left;
+    $self->accent_note($self->EIGHTH);
 }
 
 
-sub ten_stroke_roll {
+sub ten_stroke_roll { # 11
     my $self = shift;
-    for my $beat (1 .. $self->beats) {
+    # 4 diddles
+    for my $beat (0 .. 7) {
+        $self->alternate_pan(_groups_of($beat, 2), $self->pan_width);
+        $self->note($self->SIXTEENTH, $self->strike);
     }
+    $self->pan_right;
+    $self->accent_note($self->EIGHTH);
+    $self->pan_left;
+    $self->accent_note($self->EIGHTH);
+
+    # 4 diddles
+    for my $beat (1 .. 8) {
+        $self->alternate_pan(_groups_of($beat, 2), $self->pan_width);
+        $self->note($self->SIXTEENTH, $self->strike);
+    }
+    $self->pan_left;
+    $self->accent_note($self->EIGHTH);
+    $self->pan_right;
+    $self->accent_note($self->EIGHTH);
 }
 
 
-sub eleven_stroke_roll {
+sub eleven_stroke_roll { # 12
     my $self = shift;
-    for my $beat (1 .. $self->beats) {
+    # 5 diddles
+    for my $beat (0 .. 9) {
+        $self->alternate_pan(_groups_of($beat, 2), $self->pan_width);
+        $self->note($self->SIXTEENTH, $self->strike);
     }
+    $self->pan_right;
+    $self->accent_note($self->EIGHTH);
+
+    # 5 diddles
+    for my $beat (1 .. 10) {
+        $self->alternate_pan(_groups_of($beat, 2), $self->pan_width);
+        $self->note($self->SIXTEENTH, $self->strike);
+    }
+    $self->pan_left;
+    $self->accent_note($self->EIGHTH);
 }
 
 
-sub thirteen_stroke_roll {
+sub thirteen_stroke_roll { # 13
     my $self = shift;
-    for my $beat (1 .. $self->beats) {
+    # 6 diddles
+    for my $beat (0 .. 11) {
+        $self->alternate_pan(_groups_of($beat, 2), $self->pan_width);
+        $self->note($self->TRIPLET_SIXTEENTH, $self->strike);
     }
+    $self->pan_right;
+    $self->accent_note($self->EIGHTH);
+
+    # 6 diddles
+    for my $beat (1 .. 12) {
+        $self->alternate_pan(_groups_of($beat, 2), $self->pan_width);
+        $self->note($self->TRIPLET_SIXTEENTH, $self->strike);
+    }
+    $self->pan_left;
+    $self->accent_note($self->EIGHTH);
 }
 
 
-sub fifteen_stroke_roll {
+sub fifteen_stroke_roll { # 14
     my $self = shift;
-    for my $beat (1 .. $self->beats) {
+    # 7 diddles
+    for my $beat (0 .. 13) {
+        $self->alternate_pan(_groups_of($beat, 2), $self->pan_width);
+        $self->note($self->SIXTEENTH, $self->strike);
     }
+    $self->pan_right;
+    $self->accent_note($self->EIGHTH);
+
+    # 7 diddles
+    for my $beat (1 .. 14) {
+        $self->alternate_pan(_groups_of($beat, 2), $self->pan_width);
+        $self->note($self->SIXTEENTH, $self->strike);
+    }
+    $self->pan_left;
+    $self->accent_note($self->EIGHTH);
 }
 
 
-sub seventeen_stroke_roll {
+sub seventeen_stroke_roll { # 15
     my $self = shift;
-    for my $beat (1 .. $self->beats) {
+    # 8 diddles
+    for my $beat (0 .. 15) {
+        $self->alternate_pan(_groups_of($beat, 2), $self->pan_width);
+        $self->note($self->SIXTEENTH, $self->strike);
     }
+    $self->pan_right;
+    $self->accent_note($self->EIGHTH);
+
+    # 8 diddles
+    for my $beat (1 .. 16) {
+        $self->alternate_pan(_groups_of($beat, 2), $self->pan_width);
+        $self->note($self->SIXTEENTH, $self->strike);
+    }
+    $self->pan_left;
+    $self->accent_note($self->EIGHTH);
 }
 
 
 sub single_paradiddle {
     my $self = shift;
-    for my $beat (1 .. $self->beats) {
+    # 2 single strokes left
+    for my $beat (0 .. 1) {
+        $self->alternate_pan($beat % 2, $self->pan_width);
+        $self->note($self->SIXTEENTH, $self->strike);
+    }
+    # 1 diddle
+    for my $beat (0 .. 1) {
+        $self->alternate_pan(_groups_of($beat, 2), $self->pan_width);
+        $self->note($self->SIXTEENTH, $self->strike);
+    }
+
+    # 2 single strokes right
+    for my $beat (1 .. 2) {
+        $self->alternate_pan($beat % 2, $self->pan_width);
+        $self->note($self->SIXTEENTH, $self->strike);
+    }
+    # 1 diddle
+    for my $beat (1 .. 2) {
+        $self->alternate_pan(_groups_of($beat, 2), $self->pan_width);
+        $self->note($self->SIXTEENTH, $self->strike);
     }
 }
 
 
 sub double_paradiddle {
     my $self = shift;
-    for my $beat (1 .. $self->beats) {
+    # 4 single strokes starting left
+    for my $beat (0 .. 3) {
+        $self->alternate_pan($beat % 2, $self->pan_width);
+        $self->note($self->SIXTEENTH, $self->strike);
+    }
+    # 1 diddle
+    for my $beat (0 .. 1) {
+        $self->alternate_pan(_groups_of($beat, 2), $self->pan_width);
+        $self->note($self->SIXTEENTH, $self->strike);
+    }
+
+    # 2 single strokes right
+    for my $beat (1 .. 4) {
+        $self->alternate_pan($beat % 2, $self->pan_width);
+        $self->note($self->SIXTEENTH, $self->strike);
+    }
+    # 1 diddle
+    for my $beat (1 .. 2) {
+        $self->alternate_pan(_groups_of($beat, 2), $self->pan_width);
+        $self->note($self->SIXTEENTH, $self->strike);
     }
 }
 
 
 sub triple_paradiddle {
     my $self = shift;
-    for my $beat (1 .. $self->beats) {
+    # 6 single strokes starting left
+    for my $beat (0 .. 5) {
+        $self->alternate_pan($beat % 2, $self->pan_width);
+        $self->note($self->SIXTEENTH, $self->strike);
+    }
+    # 1 diddle
+    for my $beat (0 .. 1) {
+        $self->alternate_pan(_groups_of($beat, 2), $self->pan_width);
+        $self->note($self->SIXTEENTH, $self->strike);
+    }
+
+    # 2 single strokes right
+    for my $beat (1 .. 6) {
+        $self->alternate_pan($beat % 2, $self->pan_width);
+        $self->note($self->SIXTEENTH, $self->strike);
+    }
+    # 1 diddle
+    for my $beat (1 .. 2) {
+        $self->alternate_pan(_groups_of($beat, 2), $self->pan_width);
+        $self->note($self->SIXTEENTH, $self->strike);
     }
 }
 
 
 sub paradiddle_diddle {
     my $self = shift;
-    for my $beat (1 .. $self->beats) {
+    # 2 single strokes starting left
+    for my $beat (0 .. 1) {
+        $self->alternate_pan($beat % 2, $self->pan_width);
+        $self->note($self->SIXTEENTH, $self->strike);
+    }
+    # 2 diddles
+    for my $beat (0 .. 3) {
+        $self->alternate_pan(_groups_of($beat, 2), $self->pan_width);
+        $self->note($self->SIXTEENTH, $self->strike);
+    }
+
+    # 2 single strokes right
+    for my $beat (1 .. 2) {
+        $self->alternate_pan($beat % 2, $self->pan_width);
+        $self->note($self->SIXTEENTH, $self->strike);
+    }
+    # 1 diddle
+    for my $beat (1 .. 4) {
+        $self->alternate_pan(_groups_of($beat, 2), $self->pan_width);
+        $self->note($self->SIXTEENTH, $self->strike);
     }
 }
 
 
 sub flam {
     my $self = shift;
-    for my $beat (1 .. $self->beats) {
-    }
 }
 
 
 sub flam_accent {
     my $self = shift;
-    for my $beat (1 .. $self->beats) {
-    }
 }
 
 
 sub flam_tap {
     my $self = shift;
-    for my $beat (1 .. $self->beats) {
-    }
 }
 
 
 sub flamacue {
     my $self = shift;
-    for my $beat (1 .. $self->beats) {
-    }
 }
 
 
 sub flam_paradiddle {
     my $self = shift;
-    for my $beat (1 .. $self->beats) {
-    }
 }
 
 
 sub flammed_mill {
     my $self = shift;
-    for my $beat (1 .. $self->beats) {
-    }
 }
 
 
 sub flam_paradiddle_diddle {
     my $self = shift;
-    for my $beat (1 .. $self->beats) {
-    }
 }
 
 
 sub pataflafla {
     my $self = shift;
-    for my $beat (1 .. $self->beats) {
-    }
 }
 
 
 sub swiss_army_triplet {
     my $self = shift;
-    for my $beat (1 .. $self->beats) {
-    }
 }
 
 
 sub inverted_flam_tap {
     my $self = shift;
-    for my $beat (1 .. $self->beats) {
-    }
 }
 
 
 sub flam_drag {
     my $self = shift;
-    for my $beat (1 .. $self->beats) {
-    }
 }
 
 
 sub drag {
     my $self = shift;
-    for my $beat (1 .. $self->beats) {
-    }
 }
 
 
 sub single_drag_tap {
     my $self = shift;
-    for my $beat (1 .. $self->beats) {
-    }
 }
 
 
 sub double_drag_tap {
     my $self = shift;
-    for my $beat (1 .. $self->beats) {
-    }
 }
 
 
 sub lesson_25_two_and_three {
     my $self = shift;
-    for my $beat (1 .. $self->beats) {
-    }
 }
 
 
 sub single_dragadiddle {
     my $self = shift;
-    for my $beat (1 .. $self->beats) {
-    }
 }
 
 
 sub drag_paradiddle_1 {
     my $self = shift;
-    for my $beat (1 .. $self->beats) {
-    }
 }
 
 
 sub drag_paradiddle_2 {
     my $self = shift;
-    for my $beat (1 .. $self->beats) {
-    }
 }
 
 
 sub single_ratamacue {
     my $self = shift;
-    for my $beat (1 .. $self->beats) {
-    }
 }
 
 
 sub double_ratamacue {
     my $self = shift;
-    for my $beat (1 .. $self->beats) {
-    }
 }
 
 
 sub triple_ratamacue {
     my $self = shift;
-    for my $beat (1 .. $self->beats) {
-    }
 }
 
 
 sub pan_left {
-    my ($self, $width) = @_;
-    $self->pan(PAN_CENTER - $width);
+    my $self = shift;
+    $self->pan(PAN_CENTER - $self->pan_width);
 }
 sub pan_center {
-    my ($self, $width) = @_;
+    my $self = shift;
     $self->pan(PAN_CENTER);
 }
 sub pan_right {
-    my ($self, $width) = @_;
-    $self->pan(PAN_CENTER + $width);
+    my $self = shift;
+    $self->pan(PAN_CENTER + $self->pan_width);
 }
-
 
 
 sub alternate_pan {
     my ($self, $pan, $width) = @_;
+
     # Pan hard left if not given.
     $pan = 0 unless defined $pan;
-    # Set balance to 100% if necessary.
-    $width = PAN_CENTER + 1 unless defined $width;
+
+    # Set balance to center unless a width is given.
+    $width = PAN_CENTER unless defined $width;
+
     # Pan the stereo balance.
     $self->pan( $pan ? abs($width - PAN_CENTER) : PAN_CENTER + $width );
+
     # Return the pan dimensions.
     return $pan, $width;
 }
@@ -403,13 +576,15 @@ __END__
 
 =pod
 
+=encoding UTF-8
+
 =head1 NAME
 
 MIDI::Simple::Drummer::Rudiments
 
 =head1 VERSION
 
-version 0.03
+version 0.04
 
 =head1 SYNOPSIS
 
@@ -423,109 +598,189 @@ version 0.03
 
 This package contains rudiment patterns.
 
+Defaults are to pan full left and right for each hand, and to have no MIDI
+effects.
+
 =head1 NAME
 
 MIDI::Simple::Drummer::Rudiments - Drum rudiments
 
 =head1 METHODS
 
-=head2 I. Roll Rudiments
+=head2 new()
 
-=head3 A. Single Stroke Rudiments
+Sets pan_width to 1/4 distance from center.
+Sets the reverb effect to 1 and chorus to 0.
 
-1. Single Stroke Roll
+=head1 I. Roll Rudiments
+
+=head2 single_stroke_roll()
+
+=head2 single_stroke_four()
 
 2. Single Stroke Four
 
+=head2 single_stroke_seven()
+
 3. Single Stroke Seven
 
-=head3 B. Multiple Bounce Rudiments
+=head1 B. Multiple Bounce Rudiments
 
-4. Multiple Bounce Roll
+=head2 multiple_bounce_roll()
 
 TODO: Not yet implemented...
 
+=head2 triple_stroke_roll()
+
 5. Triple Stroke Roll
 
-=head3 C. Double Stroke Rudiments
+=head2 double_stroke_open_roll()
 
-6. Double Stroke Open Roll
+6. Double Stroke Open Roll (Long Roll)
+
+=head2 five_stroke_roll()
 
 7. Five Stroke Roll
 
+=head2 six_stroke_roll()
+
 8. Six Stroke Roll
+
+=head2 seven_stroke_roll()
 
 9. Seven Stroke Roll
 
+=head2 nine_stroke_roll()
+
 10. Nine Stroke Roll
+
+=head2 ten_stroke_roll()
 
 11. Ten Stroke Roll
 
+=head2 eleven_stroke_roll()
+
 12. Eleven Stroke Roll
+
+=head2 thirteen_stroke_roll()
 
 13. Thirteen Stroke Roll
 
+=head2 fifteen_stroke_roll()
+
 14. Fifteen Stroke Roll
+
+=head2 seventeen_stroke_roll()
 
 15. Seventeen Stroke Roll
 
-=head2 II. Diddle Rudiments
+=head1 II. Diddle Rudiments
+
+=head2 single_paradiddle()
 
 16. Single Paradiddle
 
+=head2 double_paradiddle()
+
 17. Double Paradiddle
+
+=head2 triple_paradiddle()
 
 18. Triple Paradiddle
 
+=head2 paradiddle_diddle()
+
 19. Paradiddle-Diddle
 
-=head2 III. Flam Rudiments
+=head1 III. Flam Rudiments
 
-20. Flam
+=head2 flam()
 
-21. Flam Accent
+20. Flam * Not yet implemented
 
-22. Flam Tap
+=head2 flam_accent()
 
-23. Flamacue
+21. Flam Accent * Not yet implemented
 
-24. Flam Paradiddle
+=head2 flam_tap()
 
-25. Flammed Mill
+22. Flam Tap * Not yet implemented
 
-26. Flam Paradiddle-Diddle
+=head2 flamacue()
 
-27. Pataflafla
+23. Flamacue * Not yet implemented
 
-28. Swiss Army Triplet
+=head2 flam_paradiddle()
 
-29. Inverted Flam Tap
+24. Flam Paradiddle * Not yet implemented
 
-30. Flam Drag
+=head2 flammed_mill()
 
-=head2 IV. Drag Rudiments
+25. Flammed Mill * Not yet implemented
 
-31. Drag
+=head2 flam_paradiddle_diddle()
 
-32. Single Drag Tap
+26. Flam Paradiddle-Diddle * Not yet implemented
 
-33. Double Drag Tap
+=head2 pataflafla()
 
-34. Lesson 25 (Two and Three)
+27. Pataflafla * Not yet implemented
 
-35. Single Dragadiddle
+=head2 swiss_army_triplet()
 
-36. Drag Paradiddle #1
+28. Swiss Army Triplet * Not yet implemented
 
-37. Drag Paradiddle #2
+=head2 inverted_flam_tap()
 
-38. Single Ratamacue
+29. Inverted Flam Tap * Not yet implemented
 
-39. Double Ratamacue
+=head2 flam_drag()
 
-40. Triple Ratamacue
+30. Flam Drag * Not yet implemented
 
-=head2 pan_left() pan_center() pan_right()
+=head1 IV. Drag Rudiments
+
+=head2 drag()
+
+31. Drag (Half Drag or Ruff) * Not yet implemented
+
+=head2 single_drag_tap()
+
+32. Single Drag Tap * Not yet implemented
+
+=head2 double_drag_tap()
+
+33. Double Drag Tap * Not yet implemented
+
+=head2 lesson_25_two_and_three()
+
+34. Lesson 25 (Two and Three) * Not yet implemented
+
+=head2 single_dragadiddle()
+
+35. Single Dragadiddle * Not yet implemented
+
+=head2 drag_paradiddle_1()
+
+36. Drag Paradiddle #1 * Not yet implemented
+
+=head2 drag_paradiddle_2()
+
+37. Drag Paradiddle #2 * Not yet implemented
+
+=head2 single_ratamacue()
+
+38. Single Ratamacue * Not yet implemented
+
+=head2 double_ratamacue()
+
+39. Double Ratamacue * Not yet implemented
+
+=head2 triple_ratamacue()
+
+40. Triple Ratamacue * Not yet implemented
+
+=head2 pan_left(), pan_center(), pan_right()
 
  $d->pan_left($width);
  $d->pan_center();
@@ -553,6 +808,8 @@ Tempo increase-decrease
 With and without metronome
 
 Straight or swing time
+
+Duple or triple application (for 5 & 7 stroke rolls)
 
 Touch velocity
 

@@ -4,7 +4,7 @@ use warnings;
 
 use MIDI::Simple::Drummer;
 
-# Have a basic aresnal (materials, resources) as bit-masks.
+# Define our basic kit so we can do binary math with it.
 my $kit = {
     rest  => 0x00,
     tick  => 0x01,
@@ -14,8 +14,52 @@ my $kit = {
     ride  => 0x10,
 };
 
-# Have a repertoire - a skill-set of manouvers, strategies and tactics.
-my $pattern = {
+# Collect user input and set defaults.
+my $repeat   = @ARGV ? shift : 1;   # Play the phrase once by default.
+my @patterns = @ARGV ? @ARGV : (1); # Play the first known pattern by default.
+
+# Enter: The Drummer.
+my $d = MIDI::Simple::Drummer->new(
+    -patterns => repertoire(@patterns),
+);
+
+# Get the set of interesting patterns.
+my $set = pattern(@patterns);
+
+# How many more times? o/`
+play($set) for 1 .. $repeat;
+
+# Output the MIDI file.
+$d->write("$0.mid");
+
+sub play {
+    my $set = shift;
+    # Play the set patterns.
+    for my $p (keys %$set) {
+        # Show status.
+        printf  '%3s (%2d): ', $p, scalar(@{ $set->{$p} });
+        # Loop over each beat of the pattern.
+        for my $beat (@{ $set->{$p} }) {
+            # Show the beat number.
+            printf '%x ', $beat;
+            # Accumulate the pads that simultaneously play.
+            my @note_list = ();
+            for my $pad (keys %$kit) {
+                # Add the pad value if present in the beat.
+                push @note_list, $d->$pad() if $beat & $kit->{$pad};
+            }
+            # Add the notes to the MIDI score.
+            # TODO Fix hardcoding of duration.
+            $d->note($d->EIGHTH, @note_list);
+        }
+        # "Close" status with a newline.
+        print "\n";
+    }
+}
+
+sub repertoire {
+    my @keys = @_;
+    my %pattern = (
     1 => [  $kit->{tick} | $kit->{kick},
             $kit->{tick},
             $kit->{tick} | $kit->{snare},
@@ -52,6 +96,15 @@ my $pattern = {
             $kit->{tick} | $kit->{snare},
             $kit->{tick} | $kit->{kick},
     ],
+    5 => [  $kit->{tick} | $kit->{kick},
+            $kit->{tick},
+            $kit->{tick} | $kit->{snare},
+            $kit->{tick},
+            $kit->{tick} | $kit->{kick},
+            $kit->{tick} | $kit->{kick},
+            $kit->{tick} | $kit->{snare},
+            $kit->{tick}
+    ],
     9 => [  $kit->{tick} | $kit->{kick},
             $kit->{rest},
             $kit->{tick} | $kit->{snare},
@@ -73,55 +126,55 @@ my $pattern = {
     11 => [ $kit->{tick} | $kit->{kick},
             $kit->{rest},
             $kit->{tick} | $kit->{snare},
-            $kit->{kick},
+                           $kit->{kick},
             $kit->{tick} | $kit->{kick},
             $kit->{rest},
             $kit->{tick} | $kit->{snare},
-            $kit->{kick}
+                           $kit->{kick}
     ],
     12 => [ $kit->{tick} | $kit->{kick},
             $kit->{rest},
             $kit->{tick} | $kit->{snare},
-            $kit->{kick},
+                           $kit->{kick},
             $kit->{tick},
-            $kit->{kick},
+                           $kit->{kick},
             $kit->{tick} | $kit->{snare},
-            $kit->{kick},
+                           $kit->{kick},
     ],
-    17 => [ $kit->{kick},
+    17 => [                $kit->{kick},
             $kit->{tick},
-            $kit->{snare},
+                           $kit->{snare},
             $kit->{tick},
-            $kit->{kick},
+                           $kit->{kick},
             $kit->{tick},
-            $kit->{snare},
+                           $kit->{snare},
             $kit->{tick}
     ],
-    18 => [ $kit->{kick},
+    18 => [                $kit->{kick},
             $kit->{tick},
             $kit->{snare} | $kit->{kick},
             $kit->{tick},
-            $kit->{kick},
+                           $kit->{kick},
             $kit->{tick},
             $kit->{snare} | $kit->{kick},
             $kit->{tick}
     ],
-    19 => [ $kit->{kick},
+    19 => [                $kit->{kick},
             $kit->{tick},
-            $kit->{snare},
+                           $kit->{snare},
             $kit->{tick} | $kit->{kick},
-            $kit->{kick},
+                           $kit->{kick},
             $kit->{tick},
-            $kit->{snare},
+                           $kit->{snare},
             $kit->{tick} | $kit->{kick}
     ],
-    20 => [ $kit->{kick},
+    20 => [                $kit->{kick},
             $kit->{tick},
-            $kit->{snare},
+                           $kit->{snare},
             $kit->{tick} | $kit->{kick},
             $kit->{rest},
             $kit->{tick} | $kit->{kick},
-            $kit->{snare},
+                           $kit->{snare},
             $kit->{tick} | $kit->{kick},
     ],
     33 => [ $kit->{tick} | $kit->{kick},
@@ -160,31 +213,31 @@ my $pattern = {
             $kit->{tick} | $kit->{snare},
             $kit->{tick} | $kit->{snare} | $kit->{kick}
     ],
-    49 => [ $kit->{kick},
+    49 => [                $kit->{kick},
             $kit->{tick},
-            $kit->{snare},
-            $kit->{tick},
-            $kit->{kick},
-            $kit->{tick},
-            $kit->{snare},
-            $kit->{tick} | $kit->{snare}
-    ],
-    50 => [ $kit->{kick},
-            $kit->{tick},
-            $kit->{snare} | $kit->{kick},
+                           $kit->{snare},
             $kit->{tick},
             $kit->{kick},
             $kit->{tick},
+                           $kit->{snare},
+            $kit->{tick} | $kit->{snare}
+    ],
+    50 => [                $kit->{kick},
+            $kit->{tick},
+            $kit->{snare} | $kit->{kick},
+            $kit->{tick},
+                           $kit->{kick},
+            $kit->{tick},
             $kit->{snare} | $kit->{kick},
             $kit->{tick} | $kit->{snare}
     ],
-    51 => [ $kit->{kick},
+    51 => [                $kit->{kick},
             $kit->{tick},
-            $kit->{snare},
+                           $kit->{snare},
             $kit->{tick} | $kit->{kick},
-            $kit->{kick},
+                           $kit->{kick},
             $kit->{tick},
-            $kit->{snare},
+                           $kit->{snare},
             $kit->{tick} | $kit->{snare} | $kit->{kick}
     ],
     52 => [ $kit->{kick},
@@ -232,40 +285,40 @@ my $pattern = {
             $kit->{tick} | $kit->{snare},
             $kit->{tick} | $kit->{kick}
     ],
-    81 => [ $kit->{kick},
+    81 => [                $kit->{kick},
             $kit->{tick},
-            $kit->{snare},
+                           $kit->{snare},
             $kit->{tick},
-            $kit->{kick},
+                           $kit->{kick},
             $kit->{tick} | $kit->{snare},
-            $kit->{snare},
+                           $kit->{snare},
             $kit->{tick}
     ],
-    82 => [ $kit->{kick},
+    82 => [                $kit->{kick},
             $kit->{tick},
             $kit->{snare} | $kit->{kick},
             $kit->{tick},
-            $kit->{kick},
+                           $kit->{kick},
             $kit->{tick} | $kit->{snare},
             $kit->{snare} | $kit->{kick},
             $kit->{tick}
     ],
-    83 => [ $kit->{kick},
+    83 => [                $kit->{kick},
             $kit->{tick},
-            $kit->{snare},
+                           $kit->{snare},
             $kit->{tick} | $kit->{kick},
-            $kit->{kick},
+                           $kit->{kick},
             $kit->{tick} | $kit->{snare},
-            $kit->{snare},
+                           $kit->{snare},
             $kit->{tick} | $kit->{kick}
     ],
-    84 => [ $kit->{kick},
+    84 => [                $kit->{kick},
             $kit->{tick},
-            $kit->{snare},
+                           $kit->{snare},
             $kit->{tick} | $kit->{kick},
             $kit->{rest},
             $kit->{tick} | $kit->{snare} | $kit->{kick},
-            $kit->{snare},
+                           $kit->{snare},
             $kit->{tick} | $kit->{kick}
     ],
     97 => [ $kit->{tick} | $kit->{snare} | $kit->{kick},
@@ -340,49 +393,49 @@ my $pattern = {
             $kit->{tick},
             $kit->{rest},
             $kit->{tick} | $kit->{snare},
-            $kit->{kick},
+                           $kit->{kick},
             $kit->{tick},
-            $kit->{snare},
+                           $kit->{snare},
             $kit->{tick},
-            $kit->{kick},
+                           $kit->{kick},
             $kit->{tick},
-            $kit->{snare},
+                           $kit->{snare},
             $kit->{tick},
-            $kit->{kick},
+                           $kit->{kick},
             $kit->{tick} | $kit->{snare},
             $kit->{rest},
             $kit->{tick}
     ],
     114 => [$kit->{snare} | $kit->{kick},
             $kit->{tick},
-            $kit->{kick},
+                           $kit->{kick},
             $kit->{tick} | $kit->{snare},
-            $kit->{kick},
+                           $kit->{kick},
             $kit->{tick},
             $kit->{snare} | $kit->{kick},
             $kit->{tick},
-            $kit->{kick},
+                           $kit->{kick},
             $kit->{tick},
             $kit->{snare} | $kit->{kick},
             $kit->{tick},
-            $kit->{kick},
+                           $kit->{kick},
             $kit->{tick} | $kit->{snare},
-            $kit->{kick},
+                           $kit->{kick},
             $kit->{tick},
     ],
     115 => [$kit->{snare} | $kit->{kick},
             $kit->{tick},
             $kit->{rest},
             $kit->{tick} | $kit->{snare} | $kit->{kick},
-            $kit->{kick},
+                           $kit->{kick},
             $kit->{tick},
-            $kit->{snare},
+                           $kit->{snare},
             $kit->{tick} | $kit->{kick},
-            $kit->{kick},
+                           $kit->{kick},
             $kit->{tick},
-            $kit->{snare},
+                           $kit->{snare},
             $kit->{tick} | $kit->{kick},
-            $kit->{kick},
+                           $kit->{kick},
             $kit->{tick} | $kit->{snare},
             $kit->{rest},
             $kit->{tick} | $kit->{kick}
@@ -393,50 +446,18 @@ my $pattern = {
             $kit->{tick} | $kit->{snare} | $kit->{kick},
             $kit->{rest},
             $kit->{tick} | $kit->{kick},
-            $kit->{snare},
+                           $kit->{snare},
             $kit->{tick} | $kit->{kick},
-            $kit->{kick},
+                           $kit->{kick},
             $kit->{tick},
-            $kit->{snare},
+                           $kit->{snare},
             $kit->{tick} | $kit->{kick},
             $kit->{rest},
             $kit->{tick} | $kit->{snare} | $kit->{kick},
             $kit->{rest},
             $kit->{tick} | $kit->{kick}
     ],
-};
-
-# Collect user input and set defaults.
-my $repeat   = @ARGV ? shift : 1;   # Play the phrase once by default.
-my @patterns = @ARGV ? @ARGV : (1); # Play the first known pattern by default.
-# $rules      = { TODO? };
-
-# Enter: The Drummer.
-my $d = MIDI::Simple::Drummer->new(-bpm => 100);
-
-# o/` How many more times?
-for (1 .. $repeat) {
-    # Play each given pattern.
-    for my $p (@patterns) {
-        # Show status (A.K.A. "debugging" output).
-        printf  '%3s (%2d): ', $p, scalar(@{ $pattern->{$p} });
-        # Loop over each beat ("note") of the pattern.
-        for my $beat (@{ $pattern->{$p} }) {
-            # Show the beat number.
-            printf '%x ', $beat;
-            # Accumulate the simultaneous note-on messages for each kit note ("pad").
-            my @note_list = ();
-            for my $pad (keys %$kit) {
-                # Add a note-on if the the kit pad is included in this beat.
-                push @note_list, $d->$pad() if $beat & $kit->{$pad};
-            }
-            # XXX Friends don't let friends hardcode (duration).
-            $d->note($d->EIGHTH, @note_list);
-        }
-        # "Close" status with a newline.
-        print "\n";
-    }
+    );
+    # Return a hash of just the interesting keys.
+    return { map { $_ => $pattern{$_} } @keys };
 }
-
-# Output the MIDI file as "program.mid"
-$d->write("$0.mid");

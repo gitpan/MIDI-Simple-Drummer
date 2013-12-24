@@ -1,6 +1,14 @@
 Revision history for MIDI-Simple-Drummer
 
-0.03      2013-01-27 10:23:15 America/Los_Angeles
+0.04      2013-12-23 20:26:35 America/Los_Angeles
+    - Added bitmask representation handling.
+    - Improved documentation!
+    - Enabled reverb and chorus CC effects.
+    - Added the -pan_width attribute.
+    - Enabled the accent_note() method.
+    - Added all but one roll and diddle phrases.
+
+0.03 2013.01.27
     - Added time signature support and tests.
     - Replaced duration computaton with the Music:Duration module.
     - Added Changes versioning plugin.
