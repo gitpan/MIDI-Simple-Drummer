@@ -1,5 +1,5 @@
 ---
-abstract: 'Glorified metronome'
+abstract: 'An algorithmic MIDI drummer'
 author:
   - 'Gene Boggs <gene@cpan.org>'
 build_requires:
@@ -28,7 +28,7 @@ requires:
 resources:
   bugtracker: https://rt.cpan.org/Public/Dist/Display.html?Name=MIDI-Simple-Drummer
   repository: git://github.com/ology/midi-simple-drummer.git
-version: 0.04
+version: 0.05
 x_Dist_Zilla:
   perl:
     version: 5.010000

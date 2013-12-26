@@ -2,9 +2,9 @@ package MIDI::Simple::Drummer;
 BEGIN {
   $MIDI::Simple::Drummer::AUTHORITY = 'cpan:GENE';
 }
-# ABSTRACT: Glorified metronome
+# ABSTRACT: An algorithmic MIDI drummer
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 use strict;
 use warnings;
@@ -57,27 +57,27 @@ sub new { # Is there a drummer in the house?
     # Our drummer is a set of attributes.
     my $self  = {
         # MIDI
-        -channel    => 9,   # MIDI-perl drum channel
-        -patch      => 0,   # The drum kit
-        -volume     => 100, # 120 max
-        -pan        => 64,  # 0L .. 64M .. 127R
-        -pan_width  => 0,   # 0 .. 64 Center
-        -reverb     => 20,  # Effect 0-127
-        -chorus     => 0,   # "
-        -power      => 0,   # Rock kit
-        -room       => 0,   # "
-        -brushes    => 0,   # "
+        -channel    => 9,
+        -volume     => 100,
+        -pan        => 64,
+        -pan_width  => 0,
+        -patch      => 0,
+        -power      => 0,
+        -room       => 0,
+        -brushes    => 0,
+        -reverb     => 20,
+        -chorus     => 0,
         # Rhythm
-        -accent     => 30,  # Volume increment
-        -bpm        => 120, # 1 qn = .5 seconds = 500,000 microseconds
-        -phrases    => 4,   # Number of groups of measures
-        -bars       => 4,   # Number of measures
-        -beats      => 4,   # Number of beats in a measure
-        -divisions  => 4,   # Number of "note values" that constitute one beat
-        -signature  => '',  # beats / divisions
-        # The Goods[TM].
+        -accent     => 30,
+        -bpm        => 120,
+        -phrases    => 4,
+        -bars       => 4,
+        -beats      => 4,
+        -divisions  => 4,
+        -signature  => '',
+        # The Goods™
         -score      => undef,
-        -file       => 'Drummer.mid', # Default if not provided by the caller.
+        -file       => 'Drummer.mid',
         -kit        => undef,
         -patterns   => undef,
         @_  # Capture any override or extra arguments.
@@ -564,11 +564,11 @@ __END__
 
 =head1 NAME
 
-MIDI::Simple::Drummer - Glorified metronome
+MIDI::Simple::Drummer - An algorithmic MIDI drummer
 
 =head1 VERSION
 
-version 0.04
+version 0.05
 
 =head1 SYNOPSIS
 
@@ -648,7 +648,7 @@ you can practice, improvise, compose, record and experiment.
 The "beats" are entirely constructed with Perl, and as such, any algorithmic
 procedure can be used to generate the phrases - Bayesian stochastic,
 evolutionary game simulation, L-system, recursive descent grammar, Markov chain,
-L<Quantumm::Whatever>...
+Quantum::Whatever...
 
 Note that B<you>, the programmer (and de facto drummer), should know what the
 kit elements are named and what the patterns do.  For these things, "Use The
@@ -656,8 +656,10 @@ Source, Luke."  Also, check out the included style sub-classes, the F<eg/*>
 files (and the F<*.mid> files they produce).
 
 The default drum kit is the B<exciting>, General MIDI Kit.  Fortunately, you can
-import the F<.mid> file into your new fangled DAW with auto-separated tracks of
-"virtual instruments." B<Harumph!>
+import the F<.mid> file into your DAW with auto-separated tracks of "virtual
+instruments."  But using the C<-patch> parameter, you can change drum kits (to
+brushes or TR-808 for instance) and also have various extended MIDI voices
+available.
 
 =head1 NAME
 
@@ -671,28 +673,29 @@ MIDI::Simple::Drummer - An algorithmic MIDI drummer
 
 Return a new C<MIDI::Simple::Drummer> instance with these default arguments:
 
-  # MIDI
-  -channel   => 9
-  -volume    => 100
-  -pan_width => 64
-  -patch     => 0
-  -reverb    => 20
-  -chorus    => 0
-  -brushes   => 0
-  -power     => 0
-  -room      => 0
-  # Rhythm metrics
-  -accent    => 30
-  -bpm       => 120
-  -phrases   => 4
-  -bars      => 4
-  -beats     => 4
-  -divisions => 8
-  -signature => ''
-  # The Goods[TM].
-  -file      => Drummer.mid
+  # MIDI parameters:
+  -channel    = 9    # MIDI-perl drum channel
+  -volume     = 100  # 120 max
+  -pan        = 64   # 0L .. 64M .. 127R
+  -pan_width  = 0    # 0 .. 64 from center
+  -patch      = 0    # Drum kit patch number
+  -power      = 0    # A rock kit
+  -room       = 0    # "
+  -brushes    = 0    # A jazz kit
+  -reverb     = 20   # Effect 0-127
+  -chorus     = 0    # "
+  # Rhythm metrics:
+  -accent     = 30   # Volume increment
+  -bpm        = 120  # 1 qn = .5 seconds = 500,000 microseconds
+  -phrases    = 4    # Number of groups of measures
+  -bars       = 4    # Number of measures
+  -beats      = 4    # Number of beats in a measure
+  -divisions  = 4    # Note values that "get the beat"
+  -signature  = ''   # beats / divisions
+  # The Goods™
+  -file      => Drummer.mid # Set this to $0.mid, for instance.
   -kit       => Standard kit set by the API
-  -patterns  => {}
+  -patterns  => {}  # To be filled at run-time
   -score     => MIDI::Simple->new_score
 
 These arguments can all be overridden in the constuctor or accessors of the same

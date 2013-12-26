@@ -58,7 +58,7 @@ MIDI::Simple::Drummer::Euclidean
 
 =head1 VERSION
 
-version 0.04
+version 0.05
 
 =head1 DESCRIPTION
 
@@ -76,8 +76,7 @@ Thinking out loud. Work in progress...
 
 =head1 SEE ALSO
 
-L<MIDI::Simple::Drummer>, the F<eg/euclidean> and F<t/05-Euclidean.t> test
-scripts.
+L<MIDI::Simple::Drummer>, the F<eg/*> and F<t/*> scripts.
 
 L<http://student.ulb.ac.be/~ptaslaki/publications/phdThesis-Perouz.pdf>
 

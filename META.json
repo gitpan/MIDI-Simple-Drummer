@@ -1,5 +1,5 @@
 {
-   "abstract" : "Glorified metronome",
+   "abstract" : "An algorithmic MIDI drummer",
    "author" : [
       "Gene Boggs <gene@cpan.org>"
    ],
@@ -61,7 +61,7 @@
          "web" : "https://github.com/ology/midi-simple-drummer"
       }
    },
-   "version" : "0.04",
+   "version" : "0.05",
    "x_Dist_Zilla" : {
       "perl" : {
          "version" : "5.010000"

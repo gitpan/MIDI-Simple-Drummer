@@ -145,7 +145,7 @@ MIDI::Simple::Drummer::Jazz
 
 =head1 VERSION
 
-version 0.04
+version 0.05
 
 =head1 DESCRIPTION
 
@@ -153,7 +153,7 @@ This package contains a collection of triplet based patterns, loaded by
 L<MIDI::Simple::Drummer>.
 
 The constructor can be provided with a specific patch number (default 33 "Jazz
-Kit") or the argument "-brushes => 1" to use the "Brush kit."
+Kit") or the argument C<-brushes =E<gt> 1> to use the "Brushes kit."
 
 Additionally, the methods below are available.
 
@@ -174,7 +174,7 @@ kit rides.  Imagine that!
 
 =head1 SEE ALSO
 
-L<MIDI::Simple::Drummer>, the F<eg/> and F<t/> test scripts.
+L<MIDI::Simple::Drummer>, the F<eg/*> and F<t/*> test scripts.
 
 =head1 AUTHOR
 

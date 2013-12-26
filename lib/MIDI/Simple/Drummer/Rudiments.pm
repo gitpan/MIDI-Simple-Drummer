@@ -2,7 +2,7 @@ package MIDI::Simple::Drummer::Rudiments;
 BEGIN {
   $MIDI::Simple::Drummer::Rudiments::AUTHORITY = 'cpan:GENE';
 }
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 use strict;
 use warnings;
 use base 'MIDI::Simple::Drummer';
@@ -437,106 +437,566 @@ sub paradiddle_diddle {
 
 sub flam {
     my $self = shift;
+
+    $self->pan_left;
+    $self->score('V' . $self->duck); # Duck!
+    $self->note($self->THIRTYSECOND, $self->strike);
+    $self->score('V' . $self->volume); # Reset the note volume.
+    $self->pan_right;
+    $self->note($self->EIGHTH, $self->strike);
+
+    $self->pan_right;
+    $self->score('V' . $self->duck); # Duck!
+    $self->note($self->THIRTYSECOND, $self->strike);
+    $self->score('V' . $self->volume); # Reset the note volume.
+    $self->pan_left;
+    $self->note($self->EIGHTH, $self->strike);
 }
 
 
 sub flam_accent {
     my $self = shift;
+
+    $self->pan_left;
+    $self->note($self->THIRTYSECOND, $self->strike);
+    $self->pan_right;
+    $self->accent_note($self->EIGHTH);
+    # 2 single strokes.
+    for my $beat (0 .. 1) {
+        $self->alternate_pan($beat % 2, $self->pan_width);
+        $self->note($self->EIGHTH, $self->strike);
+    }
+
+    $self->pan_right;
+    $self->note($self->THIRTYSECOND, $self->strike);
+    $self->pan_left;
+    $self->accent_note($self->EIGHTH);
+    # 2 single strokes.
+    for my $beat (1 .. 2) {
+        $self->alternate_pan($beat % 2, $self->pan_width);
+        $self->note($self->EIGHTH, $self->strike);
+    }
 }
 
 
 sub flam_tap {
     my $self = shift;
+
+    $self->pan_left;
+    $self->note($self->THIRTYSECOND, $self->strike);
+    $self->pan_right;
+    # 1 diddle
+    $self->accent_note($self->SIXTEENTH);
+    $self->note($self->SIXTEENTH, $self->strike);
+
+    $self->pan_right;
+    $self->note($self->THIRTYSECOND, $self->strike);
+    $self->pan_left;
+    # 1 diddle
+    $self->accent_note($self->EIGHTH);
+    $self->note($self->SIXTEENTH, $self->strike);
 }
 
 
 sub flamacue {
     my $self = shift;
+
+    # Flam
+    $self->pan_left;
+    $self->note($self->THIRTYSECOND, $self->strike);
+    $self->pan_right;
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->pan_left;
+    $self->accent_note($self->SIXTEENTH);
+    # 2 single strokes.
+    for my $beat (0 .. 1) {
+        $self->alternate_pan($beat % 2, $self->pan_width);
+        $self->note($self->EIGHTH, $self->strike);
+    }
+    # Flam
+    $self->pan_left;
+    $self->note($self->THIRTYSECOND, $self->strike);
+    $self->pan_right;
+    $self->note($self->SIXTEENTH, $self->strike);
+
+    # Flam
+    $self->pan_right;
+    $self->note($self->THIRTYSECOND, $self->strike);
+    $self->pan_left;
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->pan_right;
+    $self->accent_note($self->SIXTEENTH);
+    # 2 single strokes.
+    for my $beat (1 .. 2) {
+        $self->alternate_pan($beat % 2, $self->pan_width);
+        $self->note($self->EIGHTH, $self->strike);
+    }
+    # Flam
+    $self->pan_left;
+    $self->note($self->THIRTYSECOND, $self->strike);
+    $self->pan_right;
+    $self->note($self->SIXTEENTH, $self->strike);
+
 }
 
 
 sub flam_paradiddle {
     my $self = shift;
+
+    # Flam
+    $self->pan_left;
+    $self->note($self->THIRTYSECOND, $self->strike);
+    $self->pan_right;
+    $self->accent_note($self->SIXTEENTH);
+    $self->pan_left;
+    $self->note($self->SIXTEENTH, $self->strike);
+    # 1 diddle
+    $self->pan_right;
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->note($self->SIXTEENTH, $self->strike);
+
+    # Flam
+    $self->pan_right;
+    $self->note($self->THIRTYSECOND, $self->strike);
+    $self->pan_left;
+    $self->accent_note($self->SIXTEENTH);
+    $self->pan_right;
+    $self->note($self->SIXTEENTH, $self->strike);
+    # 1 diddle
+    $self->pan_left;
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->note($self->SIXTEENTH, $self->strike);
+
 }
 
 
 sub flammed_mill {
     my $self = shift;
+
+    $self->pan_left;
+    $self->note($self->THIRTYSECOND, $self->strike);
+    $self->pan_right;
+    $self->accent_note($self->SIXTEENTH);
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->pan_left;
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->pan_right;
+    $self->note($self->SIXTEENTH, $self->strike);
+
+    $self->pan_right;
+    $self->note($self->THIRTYSECOND, $self->strike);
+    $self->pan_left;
+    $self->accent_note($self->SIXTEENTH);
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->pan_right;
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->pan_left;
+    $self->note($self->SIXTEENTH, $self->strike);
+
 }
 
 
 sub flam_paradiddle_diddle {
     my $self = shift;
+
+    $self->pan_left;
+    $self->note($self->THIRTYSECOND, $self->strike);
+    $self->pan_right;
+    $self->accent_note($self->SIXTEENTH);
+    $self->pan_left;
+    $self->note($self->SIXTEENTH, $self->strike);
+    # 2 diddles
+    for my $beat (0 .. 3) {
+        $self->alternate_pan(_groups_of($beat, 2), $self->pan_width);
+        $self->note($self->SIXTEENTH, $self->strike);
+    }
+
+    $self->pan_right;
+    $self->note($self->THIRTYSECOND, $self->strike);
+    $self->pan_left;
+    $self->accent_note($self->SIXTEENTH);
+    $self->pan_right;
+    $self->note($self->SIXTEENTH, $self->strike);
+    # 2 diddles
+    for my $beat (1 .. 4) {
+        $self->alternate_pan(_groups_of($beat, 2), $self->pan_width);
+        $self->note($self->SIXTEENTH, $self->strike);
+    }
 }
 
 
 sub pataflafla {
     my $self = shift;
+
+    for (0 .. 1) {
+        $self->pan_left;
+        $self->note($self->THIRTYSECOND, $self->strike);
+        $self->pan_right;
+        $self->accent_note($self->SIXTEENTH);
+        $self->pan_left;
+        $self->note($self->SIXTEENTH, $self->strike);
+        $self->pan_right;
+        $self->note($self->SIXTEENTH, $self->strike);
+        $self->note($self->THIRTYSECOND, $self->strike);
+        $self->pan_left;
+        $self->accent_note($self->SIXTEENTH);
+    }
 }
 
 
 sub swiss_army_triplet {
     my $self = shift;
+
+    for (0 .. 1) {
+        $self->pan_left;
+        $self->note($self->THIRTYSECOND, $self->strike);
+        $self->pan_right;
+        $self->accent_note($self->TRIPLET_SIXTEENTH);
+        $self->note($self->TRIPLET_SIXTEENTH, $self->strike);
+        $self->pan_left;
+        $self->note($self->TRIPLET_SIXTEENTH, $self->strike);
+    }
 }
 
 
 sub inverted_flam_tap {
     my $self = shift;
+
+    for (0 .. 1) {
+        $self->pan_left;
+        $self->note($self->THIRTYSECOND, $self->strike);
+        $self->pan_right;
+        $self->accent_note($self->SIXTEENTH);
+        $self->pan_left;
+        $self->note($self->SIXTEENTH, $self->strike);
+
+        $self->pan_right;
+        $self->note($self->THIRTYSECOND, $self->strike);
+        $self->pan_left;
+        $self->accent_note($self->SIXTEENTH);
+        $self->pan_right;
+        $self->note($self->SIXTEENTH, $self->strike);
+    }
 }
 
 
 sub flam_drag {
     my $self = shift;
+
+    $self->pan_left;
+    $self->note($self->THIRTYSECOND, $self->strike);
+    $self->pan_right;
+    $self->accent_note($self->EIGHTH);
+    $self->pan_left;
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->pan_right;
+    $self->accent_note($self->EIGHTH);
+
+    $self->pan_right;
+    $self->note($self->THIRTYSECOND, $self->strike);
+    $self->pan_left;
+    $self->accent_note($self->EIGHTH);
+    $self->pan_right;
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->pan_left;
+    $self->accent_note($self->EIGHTH);
+
 }
 
 
 sub drag {
     my $self = shift;
+
+    $self->pan_left;
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->pan_right;
+    $self->note($self->QUARTER, $self->strike);
+
+    $self->pan_right;
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->pan_left;
+    $self->note($self->QUARTER, $self->strike);
 }
 
 
 sub single_drag_tap {
     my $self = shift;
+
+    $self->pan_left;
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->pan_right;
+    $self->note($self->EIGHTH, $self->strike);
+    $self->pan_left;
+    $self->accent_note($self->EIGHTH);
+
+    $self->pan_right;
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->pan_left;
+    $self->note($self->EIGHTH, $self->strike);
+    $self->pan_right;
+    $self->accent_note($self->EIGHTH);
+
 }
 
 
 sub double_drag_tap {
     my $self = shift;
+
+    $self->pan_left;
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->pan_right;
+    $self->note($self->EIGHTH, $self->strike);
+    $self->pan_left;
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->pan_right;
+    $self->note($self->EIGHTH, $self->strike);
+    $self->pan_left;
+    $self->accent_note($self->EIGHTH);
+
+    $self->pan_right;
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->pan_left;
+    $self->note($self->EIGHTH, $self->strike);
+    $self->pan_right;
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->pan_left;
+    $self->note($self->EIGHTH, $self->strike);
+    $self->pan_right;
+    $self->accent_note($self->EIGHTH);
 }
 
 
 sub lesson_25_two_and_three {
     my $self = shift;
+
+    $self->pan_left;
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->pan_right;
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->pan_left;
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->pan_right;
+    $self->note($self->EIGHTH, $self->strike);
+    $self->pan_left;
+    $self->accent_note($self->EIGHTH);
 }
 
 
 sub single_dragadiddle {
     my $self = shift;
+
+    $self->pan_right;
+    $self->accent_note($self->SIXTEENTH);
+    $self->accent_note($self->SIXTEENTH);
+    $self->pan_left;
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->pan_right;
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->note($self->SIXTEENTH, $self->strike);
+
+    $self->pan_left;
+    $self->accent_note($self->SIXTEENTH);
+    $self->accent_note($self->SIXTEENTH);
+    $self->pan_right;
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->pan_left;
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->note($self->SIXTEENTH, $self->strike);
 }
 
 
 sub drag_paradiddle_1 {
     my $self = shift;
+
+    $self->pan_right;
+    $self->accent_note($self->EIGHTH);
+    $self->pan_left;
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->pan_right;
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->pan_left;
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->pan_right;
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->note($self->SIXTEENTH, $self->strike);
+
+    $self->pan_left;
+    $self->accent_note($self->EIGHTH);
+    $self->pan_right;
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->pan_left;
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->pan_right;
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->pan_left;
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->note($self->SIXTEENTH, $self->strike);
+
 }
 
 
 sub drag_paradiddle_2 {
     my $self = shift;
+
+    $self->pan_right;
+    $self->accent_note($self->EIGHTH);
+    $self->pan_left;
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->pan_right;
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->pan_left;
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->pan_right;
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->note($self->SIXTEENTH, $self->strike);
+
+    $self->pan_left;
+    $self->accent_note($self->EIGHTH);
+    $self->pan_right;
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->pan_left;
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->pan_right;
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->pan_left;
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->note($self->SIXTEENTH, $self->strike);
+
 }
 
 
 sub single_ratamacue {
     my $self = shift;
+
+    $self->pan_left;
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->pan_right;
+    $self->note($self->TRIPLET_SIXTEENTH, $self->strike);
+    $self->pan_left;
+    $self->note($self->TRIPLET_SIXTEENTH, $self->strike);
+    $self->pan_right;
+    $self->note($self->TRIPLET_SIXTEENTH, $self->strike);
+    $self->pan_left;
+    $self->accent_note($self->EIGHTH);
+
+    $self->pan_right;
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->pan_left;
+    $self->note($self->TRIPLET_SIXTEENTH, $self->strike);
+    $self->pan_right;
+    $self->note($self->TRIPLET_SIXTEENTH, $self->strike);
+    $self->pan_left;
+    $self->note($self->TRIPLET_SIXTEENTH, $self->strike);
+    $self->pan_right;
+    $self->accent_note($self->EIGHTH);
 }
 
 
 sub double_ratamacue {
     my $self = shift;
+
+    $self->pan_left;
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->pan_right;
+    $self->accent_note($self->EIGHTH);
+    $self->pan_left;
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->pan_right;
+    $self->note($self->TRIPLET_SIXTEENTH, $self->strike);
+    $self->pan_left;
+    $self->note($self->TRIPLET_SIXTEENTH, $self->strike);
+    $self->pan_right;
+    $self->note($self->TRIPLET_SIXTEENTH, $self->strike);
+    $self->pan_left;
+    $self->accent_note($self->EIGHTH);
+
+    $self->pan_right;
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->pan_left;
+    $self->accent_note($self->EIGHTH);
+    $self->pan_right;
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->pan_left;
+    $self->note($self->TRIPLET_SIXTEENTH, $self->strike);
+    $self->pan_right;
+    $self->note($self->TRIPLET_SIXTEENTH, $self->strike);
+    $self->pan_left;
+    $self->note($self->TRIPLET_SIXTEENTH, $self->strike);
+    $self->pan_right;
+    $self->accent_note($self->EIGHTH);
+
 }
 
 
 sub triple_ratamacue {
     my $self = shift;
+
+    $self->pan_left;
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->pan_right;
+    $self->note($self->EIGHTH, $self->strike);
+    $self->pan_left;
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->pan_right;
+    $self->note($self->EIGHTH, $self->strike);
+    $self->pan_left;
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->pan_right;
+    $self->note($self->TRIPLET_SIXTEENTH, $self->strike);
+    $self->pan_left;
+    $self->note($self->TRIPLET_SIXTEENTH, $self->strike);
+    $self->pan_right;
+    $self->note($self->TRIPLET_SIXTEENTH, $self->strike);
+    $self->pan_left;
+    $self->accent_note($self->EIGHTH);
+
+    $self->pan_right;
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->pan_left;
+    $self->note($self->EIGHTH, $self->strike);
+    $self->pan_right;
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->pan_left;
+    $self->note($self->EIGHTH, $self->strike);
+    $self->pan_right;
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->note($self->SIXTEENTH, $self->strike);
+    $self->pan_left;
+    $self->note($self->TRIPLET_SIXTEENTH, $self->strike);
+    $self->pan_right;
+    $self->note($self->TRIPLET_SIXTEENTH, $self->strike);
+    $self->pan_left;
+    $self->note($self->TRIPLET_SIXTEENTH, $self->strike);
+    $self->pan_right;
+    $self->accent_note($self->EIGHTH);
+
 }
 
 
@@ -584,7 +1044,7 @@ MIDI::Simple::Drummer::Rudiments
 
 =head1 VERSION
 
-version 0.04
+version 0.05
 
 =head1 SYNOPSIS
 
@@ -615,6 +1075,8 @@ Sets the reverb effect to 1 and chorus to 0.
 =head1 I. Roll Rudiments
 
 =head2 single_stroke_roll()
+
+1. Single Stroke Roll
 
 =head2 single_stroke_four()
 
@@ -696,89 +1158,89 @@ TODO: Not yet implemented...
 
 =head2 flam()
 
-20. Flam * Not yet implemented
+20. Flam
 
 =head2 flam_accent()
 
-21. Flam Accent * Not yet implemented
+21. Flam Accent
 
 =head2 flam_tap()
 
-22. Flam Tap * Not yet implemented
+22. Flam Tap
 
 =head2 flamacue()
 
-23. Flamacue * Not yet implemented
+23. Flamacue
 
 =head2 flam_paradiddle()
 
-24. Flam Paradiddle * Not yet implemented
+24. Flam Paradiddle
 
 =head2 flammed_mill()
 
-25. Flammed Mill * Not yet implemented
+25. Flammed Mill
 
 =head2 flam_paradiddle_diddle()
 
-26. Flam Paradiddle-Diddle * Not yet implemented
+26. Flam Paradiddle-Diddle
 
 =head2 pataflafla()
 
-27. Pataflafla * Not yet implemented
+27. Pataflafla
 
 =head2 swiss_army_triplet()
 
-28. Swiss Army Triplet * Not yet implemented
+28. Swiss Army Triplet
 
 =head2 inverted_flam_tap()
 
-29. Inverted Flam Tap * Not yet implemented
+29. Inverted Flam Tap
 
 =head2 flam_drag()
 
-30. Flam Drag * Not yet implemented
+30. Flam Drag
 
 =head1 IV. Drag Rudiments
 
 =head2 drag()
 
-31. Drag (Half Drag or Ruff) * Not yet implemented
+31. Drag (Half drag or ruff)
 
 =head2 single_drag_tap()
 
-32. Single Drag Tap * Not yet implemented
+32. Single Drag Tap
 
 =head2 double_drag_tap()
 
-33. Double Drag Tap * Not yet implemented
+33. Double Drag Tap
 
 =head2 lesson_25_two_and_three()
 
-34. Lesson 25 (Two and Three) * Not yet implemented
+34. Lesson 25 (Two and Three)
 
 =head2 single_dragadiddle()
 
-35. Single Dragadiddle * Not yet implemented
+35. Single Dragadiddle
 
 =head2 drag_paradiddle_1()
 
-36. Drag Paradiddle #1 * Not yet implemented
+36. Drag Paradiddle #1
 
 =head2 drag_paradiddle_2()
 
-37. Drag Paradiddle #2 * Not yet implemented
+37. Drag Paradiddle #2
 
 =head2 single_ratamacue()
 
-38. Single Ratamacue * Not yet implemented
+38. Single Ratamacue
 
 =head2 double_ratamacue()
 
-39. Double Ratamacue * Not yet implemented
+39. Double Ratamacue
 
 =head2 triple_ratamacue()
 
-40. Triple Ratamacue * Not yet implemented
+40. Triple Ratamacue
 
 =head2 pan_left(), pan_center(), pan_right()
 
@@ -815,7 +1277,7 @@ Touch velocity
 
 =head1 SEE ALSO
 
-L<MIDI::Simple::Drummer>, the F<eg/> and F<t/> test scripts.
+L<MIDI::Simple::Drummer>, the F<eg/*> and F<t/*> scripts.
 
 L<http://en.wikipedia.org/wiki/Drum_rudiment>
 

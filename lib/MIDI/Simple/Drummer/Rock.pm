@@ -132,7 +132,7 @@ MIDI::Simple::Drummer::Rock
 
 =head1 VERSION
 
-version 0.04
+version 0.05
 
 =head1 DESCRIPTION
 
@@ -140,8 +140,8 @@ This package contains a collection of common rock patterns, loaded by
 L<MIDI::Simple::Drummer>.
 
 The constructor can be provided with a specific patch number (default 1
-"Standard Kit") or the arguments "-power => 1" or "-room => 1" to use the
-alternate rock kits.
+"Standard Kit") or the arguments C<-power =E<gt> 1> or C<-room =E<gt> 1> to use
+the alternate rock kits.
 
 =head1 NAME
 
@@ -149,11 +149,11 @@ MIDI::Simple::Drummer::Rock - Rock drum grooves
 
 =head1 TO DO
 
-* "Do some cooler fills, Man."
+Some cooler fills, Man.
 
 =head1 SEE ALSO
 
-L<MIDI::Simple::Drummer>, the F<eg/> and F<t/> test scripts.
+L<MIDI::Simple::Drummer>, the F<eg/*> and F<t/*> scripts.
 
 =head1 AUTHOR
 
