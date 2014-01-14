@@ -20,15 +20,15 @@ name: MIDI-Simple-Drummer
 requires:
   MIDI::Simple: 0
   Music::Duration: 0
-  base: 0
   constant: 0
+  parent: 0
   perl: 5.006
   strict: 0
   warnings: 0
 resources:
   bugtracker: https://rt.cpan.org/Public/Dist/Display.html?Name=MIDI-Simple-Drummer
   repository: git://github.com/ology/midi-simple-drummer.git
-version: 0.05
+version: 0.06
 x_Dist_Zilla:
   perl:
     version: 5.010000

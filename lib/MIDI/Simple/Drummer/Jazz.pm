@@ -5,7 +5,7 @@ BEGIN {
 our $VERSION = '0.02';
 use strict;
 use warnings;
-use base 'MIDI::Simple::Drummer';
+use parent 'MIDI::Simple::Drummer';
 
 sub new {
     my $self = shift;
@@ -145,7 +145,7 @@ MIDI::Simple::Drummer::Jazz
 
 =head1 VERSION
 
-version 0.05
+version 0.06
 
 =head1 DESCRIPTION
 
@@ -182,7 +182,7 @@ Gene Boggs <gene@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is copyright (c) 2013 by Gene Boggs.
+This software is copyright (c) 2014 by Gene Boggs.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.

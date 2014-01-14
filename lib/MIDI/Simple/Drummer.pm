@@ -4,7 +4,7 @@ BEGIN {
 }
 # ABSTRACT: An algorithmic MIDI drummer
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 use strict;
 use warnings;
@@ -113,6 +113,12 @@ sub _setup { # Where's my roadies, Man?
         $self->{-beats}     ||= 4;
         $self->{-divisions} ||= 4;
         $self->{-signature} = "$self->{-beats}/$self->{-divisions}";
+    }
+
+    # Reset the backbeat if the signature is a 3 multiple.
+    my $x = $self->{-beats} / 3;
+    if ($x !~ /\./) {
+        $self->backbeat('Acoustic Bass Drum', 'Acoustic Snare', 'Acoustic Bass Drum');
     }
 
     # Set the method name for the division metric. Ex: QUARTER for 4.
@@ -568,7 +574,7 @@ MIDI::Simple::Drummer - An algorithmic MIDI drummer
 
 =head1 VERSION
 
-version 0.05
+version 0.06
 
 =head1 SYNOPSIS
 
@@ -868,9 +874,6 @@ B<patches> is a list of possible patches to use instead of the crash cymbals.
 B<tick> is the patch to use instead of the closed hi-hat.
 B<fill> is the fill pattern we last played.
 
-Two patches in the B<backbeat> are said to alternate, as in 4/4 time.  Three
-patches rotate in 3/4 time, etc.
-
 =head2 beat()
 
   $x = $d->beat;
@@ -997,7 +1000,8 @@ Strike or set the "snare" patches.  By default, this is the C<Acoustic Snare.>
     $x = $d->backbeat('Bass Drum 1','Side Stick');
 
 Strike or set the "backbeat" patches.  By default, these are the predefined
-C<kick> and C<snare> patches.
+C<kick> and C<snare> patches.  But if the time signature is a multiple of three,
+the backbeat is set to a "kick snare kick" pattern.
 
 =head1 CONVENIENCE METHODS
 
@@ -1103,7 +1107,7 @@ Gene Boggs <gene@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is copyright (c) 2013 by Gene Boggs.
+This software is copyright (c) 2014 by Gene Boggs.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.

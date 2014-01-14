@@ -23,8 +23,10 @@ CPAN
 DAW
 Dragadiddle
 Flam
+flam
 Flamacue
 Flammed
+flammed
 Goroway
 OO
 Paradiddle

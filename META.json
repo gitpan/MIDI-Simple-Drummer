@@ -32,8 +32,8 @@
          "requires" : {
             "MIDI::Simple" : "0",
             "Music::Duration" : "0",
-            "base" : "0",
             "constant" : "0",
+            "parent" : "0",
             "perl" : "5.006",
             "strict" : "0",
             "warnings" : "0"
@@ -61,7 +61,7 @@
          "web" : "https://github.com/ology/midi-simple-drummer"
       }
    },
-   "version" : "0.05",
+   "version" : "0.06",
    "x_Dist_Zilla" : {
       "perl" : {
          "version" : "5.010000"

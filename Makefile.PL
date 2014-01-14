@@ -22,8 +22,8 @@ my %WriteMakefileArgs = (
   "PREREQ_PM" => {
     "MIDI::Simple" => 0,
     "Music::Duration" => 0,
-    "base" => 0,
     "constant" => 0,
+    "parent" => 0,
     "strict" => 0,
     "warnings" => 0
   },
@@ -33,7 +33,7 @@ my %WriteMakefileArgs = (
     "IPC::Open3" => 0,
     "Test::More" => 0
   },
-  "VERSION" => "0.05",
+  "VERSION" => "0.06",
   "test" => {
     "TESTS" => "t/*.t"
   }
@@ -47,8 +47,8 @@ my %FallbackPrereqs = (
   "MIDI::Simple" => 0,
   "Music::Duration" => 0,
   "Test::More" => 0,
-  "base" => 0,
   "constant" => 0,
+  "parent" => 0,
   "strict" => 0,
   "warnings" => 0
 );

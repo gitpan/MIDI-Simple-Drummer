@@ -14,7 +14,6 @@ eg/metronome
 eg/multi-track
 eg/rock-drummer
 eg/rudiments
-eg/ts-metronome
 lib/MIDI/Simple/Drummer.pm
 lib/MIDI/Simple/Drummer/Euclidean.pm
 lib/MIDI/Simple/Drummer/Jazz.pm

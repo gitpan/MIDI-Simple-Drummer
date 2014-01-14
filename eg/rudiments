@@ -6,9 +6,11 @@ use MIDI::Simple::Drummer::Rudiments;
 
 my $d = MIDI::Simple::Drummer::Rudiments->new(
     -volume => 50,
-    -bpm    => 70,
+    -bpm    => 30,
 );
-$d->count_in;
+#$d->count_in;
 $d->snare('Electric Snare');
-$d->beat(-name => 10);
+for my $n (keys %{ $d->_default_patterns }) {
+    $d->beat(-name => $n);
+}
 $d->write("$0.mid");
