@@ -24,7 +24,7 @@ printf("Backbeat: '%s' - '%s' [%s - %s]\n",
     $d->_p2n->{($d->name_of('backbeat'))[1]},
 );
 # The whole kit:
-#warn Data::Dumper->new([ $d->kit ])->Indent(1)->Terse(1)->Sortkeys(1)->Dump;
+warn Data::Dumper->new([ $d->kit ])->Indent(1)->Terse(1)->Sortkeys(1)->Dump;
 
 # Patch name to number:
 #print Data::Dumper->new([ $d->_p2n ])->Indent(1)->Terse(1)->Sortkeys(1)->Dump;

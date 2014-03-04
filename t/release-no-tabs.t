@@ -9,7 +9,7 @@ BEGIN {
 use strict;
 use warnings;
 
-# this test was generated with Dist::Zilla::Plugin::NoTabsTests 0.05
+# this test was generated with Dist::Zilla::Plugin::NoTabsTests 0.06
 
 use Test::More 0.88;
 use Test::NoTabs;
@@ -17,6 +17,7 @@ use Test::NoTabs;
 my @files = (
     'lib/MIDI/Simple/Drummer.pm',
     'lib/MIDI/Simple/Drummer/Euclidean.pm',
+    'lib/MIDI/Simple/Drummer/Funk.pm',
     'lib/MIDI/Simple/Drummer/Jazz.pm',
     'lib/MIDI/Simple/Drummer/Rock.pm',
     'lib/MIDI/Simple/Drummer/Rudiments.pm'

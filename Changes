@@ -1,5 +1,11 @@
 Revision history for MIDI-Simple-Drummer
 
+0.0601    2014-03-03 19:16:51EST-0500 America/New_York
+    - Creating eg/back-in-black...
+    - Fixed accidental phrase duplication in Rock patterns.
+    - Modularized Rock "half beat" code.
+    - Added Funk placeholder...
+
 0.06      2014-01-13 22:45:55 America/New_York
     - Enabled MIDI drumkit types (e.g. "power", "brushes").
     - Enabled MIDI reverb and chorus effect setting.

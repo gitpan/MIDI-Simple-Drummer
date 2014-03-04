@@ -4,7 +4,7 @@ BEGIN {
 }
 # ABSTRACT: An algorithmic MIDI drummer
 
-our $VERSION = '0.06';
+our $VERSION = '0.0601';
 
 use strict;
 use warnings;
@@ -574,7 +574,7 @@ MIDI::Simple::Drummer - An algorithmic MIDI drummer
 
 =head1 VERSION
 
-version 0.06
+version 0.0601
 
 =head1 SYNOPSIS
 
