@@ -145,7 +145,7 @@ MIDI::Simple::Drummer::Jazz
 
 =head1 VERSION
 
-version 0.0601
+version 0.07
 
 =head1 DESCRIPTION
 

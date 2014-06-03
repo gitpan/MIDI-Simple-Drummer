@@ -2,29 +2,40 @@ package MIDI::Simple::Drummer::Euclidean;
 BEGIN {
   $MIDI::Simple::Drummer::Euclidean::AUTHORITY = 'cpan:GENE';
 }
-our $VERSION = '0.00_01';
 use strict;
 use warnings;
 use parent 'MIDI::Simple::Drummer';
+our $VERSION = '0.01';
 
 sub new {
     my $self = shift;
     $self->SUPER::new(
+        -onsets => 4,
         -patch  => 25,
-        -tr_808 => 0,
+        -tr808  => 0,
+        -rhythm => undef,
         @_
     );
-    # Use the requested kit.
-    if ($self->{-tr_808}) {
-        $self->patch(26);
-    }
 }
 
 sub _default_patterns {
     my $self = shift;
     return {
 
-1 => \&euclid,
+1 => sub {
+    my $self = shift;
+    my $rhythm = $self->{-rhythm}
+        ? $self->{-rhythm}
+        : $self->euclid($self->{-onsets}, $self->beats);
+    for my $i ( @$rhythm ) {
+        if ( $i eq 'x' ) {
+            $self->note($self->EIGHTH, $self->kick);
+        }
+        else {
+            $self->rest($self->EIGHTH);
+        }
+    }
+}
 
     };
 }
@@ -33,16 +44,43 @@ sub euclid {
     my $self = shift;
     my ($m, $n) = @_;
 
-    my $ones = 1 x $m;
-    my $zeros = 0 x ($n - $m);
+    # Onsets per measure
+    $m ||= $self->{-onsets};
+    # Beats per measure
+    $n ||= $self->beats;
 
-    if (@$n) {
-        return euclid($n % $m, $m);
+    # Line is from x=0, y=1 to x=$BPM, y=$mod+1
+    # Then from that, for each $y from # 1..$mod
+    # figure out the x value to see where beat would be.
+
+    my $intercept = 1;
+
+    # y = mx + b; b is 1 as we're drawing the intercept through that point,
+    # and then (y2-y1)/(x2-x1) reduces to just:
+    my $slope = $m / $n;
+
+    my @onsets = ('.') x $n;
+    for my $y ( 1 .. $m ) {
+        # solve x = (y-b)/m rounding nearest and put the beat there
+        $onsets[ sprintf "%.0f", ( $y - $intercept ) / $slope ] = 'x';
     }
-    else {
-        return $m;
-    }
+
+    return \@onsets;
 };
+
+sub rotate {
+    my $self = shift;
+    my $phrase = shift;
+
+    my $done = 0;
+    while ( $done == 0 ) {
+        my $i = shift @$phrase;
+        push @$phrase, $i;
+        $done++ if $phrase->[0] eq 'x';
+    }
+
+    return $phrase;
+}
 
 1;
 
@@ -58,11 +96,11 @@ MIDI::Simple::Drummer::Euclidean
 
 =head1 VERSION
 
-version 0.0601
+version 0.07
 
 =head1 DESCRIPTION
 
-Sadly, this module is but a stub.
+Generate Euclidean rhythms and "world beat" grooves.
 
 =head1 NAME
 
@@ -72,7 +110,11 @@ MIDI::Simple::Drummer::Euclidean - Euclidean Rhythms
 
 =head2 euclid()
 
-Thinking out loud. Work in progress...
+Return a list of B<x> onsets or B<.> rests given the C<onsets> and C<beats>.
+
+=head2 rotate()
+
+Rotate the given list of onsets and rests to the next (to the right) onset.
 
 =head1 SEE ALSO
 

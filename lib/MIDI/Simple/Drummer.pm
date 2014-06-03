@@ -4,7 +4,7 @@ BEGIN {
 }
 # ABSTRACT: An algorithmic MIDI drummer
 
-our $VERSION = '0.0601';
+our $VERSION = '0.07';
 
 use strict;
 use warnings;
@@ -142,6 +142,9 @@ sub _setup { # Where's my roadies, Man?
     }
     elsif ($self->{-brushes}) {
         $self->patch(41);
+    }
+    if ($self->{-tr808}) {
+        $self->patch(26);
     }
     else {
         # Set to the assigned -patch.
@@ -574,7 +577,7 @@ MIDI::Simple::Drummer - An algorithmic MIDI drummer
 
 =head1 VERSION
 
-version 0.0601
+version 0.07
 
 =head1 SYNOPSIS
 
@@ -1100,6 +1103,8 @@ importing.
 
 Kevin Goroway E<lt>kgoroway@yahoo.com<gt> for asking where the time signature
 was and if the rudiments package was going to happen.
+
+Jeremy Mates for the clever Euclidian rhythm algorithm.
 
 =head1 AUTHOR
 
