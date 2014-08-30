@@ -4,7 +4,7 @@ BEGIN {
 }
 # ABSTRACT: An algorithmic MIDI drummer
 
-our $VERSION = '0.07';
+our $VERSION = '0.0701';
 
 use strict;
 use warnings;
@@ -577,7 +577,7 @@ MIDI::Simple::Drummer - An algorithmic MIDI drummer
 
 =head1 VERSION
 
-version 0.07
+version 0.0701
 
 =head1 SYNOPSIS
 
@@ -669,10 +669,6 @@ import the F<.mid> file into your DAW with auto-separated tracks of "virtual
 instruments."  But using the C<-patch> parameter, you can change drum kits (to
 brushes or TR-808 for instance) and also have various extended MIDI voices
 available.
-
-=head1 NAME
-
-MIDI::Simple::Drummer - An algorithmic MIDI drummer
 
 =head1 METHODS
 

@@ -96,7 +96,7 @@ MIDI::Simple::Drummer::Euclidean
 
 =head1 VERSION
 
-version 0.07
+version 0.0701
 
 =head1 DESCRIPTION
 
