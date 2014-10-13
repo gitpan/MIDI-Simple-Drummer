@@ -54,7 +54,7 @@ lib
 MIDI
 Simple
 Drummer
-Euclidean
 Rudiments
 Jazz
+Euclidean
 Rock

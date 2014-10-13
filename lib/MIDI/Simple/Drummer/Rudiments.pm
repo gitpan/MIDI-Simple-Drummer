@@ -967,7 +967,7 @@ MIDI::Simple::Drummer::Rudiments
 
 =head1 VERSION
 
-version 0.0701
+version 0.08
 
 =head1 SYNOPSIS
 

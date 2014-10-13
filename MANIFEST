@@ -8,11 +8,13 @@ Makefile.PL
 README
 dist.ini
 eg/back-in-black
+eg/back-in-black.mid
 eg/basics
 eg/bitmask-drums
 eg/durations
 eg/jazz-drummer
 eg/metronome
+eg/multi-euclid
 eg/multi-track
 eg/rock-drummer
 eg/rudiments
@@ -29,8 +31,8 @@ t/02-Rock.t
 t/03-Jazz.t
 t/04-Rudiments.t
 t/05-Euclidean.t
+t/author-no-tabs.t
 t/author-pod-spell.t
 t/release-eol.t
-t/release-no-tabs.t
 t/release-pod-coverage.t
 t/release-pod-syntax.t

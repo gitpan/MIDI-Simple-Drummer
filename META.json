@@ -4,7 +4,7 @@
       "Gene Boggs <gene@cpan.org>"
    ],
    "dynamic_config" : 0,
-   "generated_by" : "Dist::Zilla version 5.020, CPAN::Meta::Converter version 2.141520",
+   "generated_by" : "Dist::Zilla version 5.020, CPAN::Meta::Converter version 2.142060",
    "license" : [
       "perl_5"
    ],
@@ -62,7 +62,7 @@
          "web" : "https://github.com/ology/midi-simple-drummer"
       }
    },
-   "version" : "0.0701",
+   "version" : "0.08",
    "x_Dist_Zilla" : {
       "perl" : {
          "version" : "5.021002"
@@ -279,10 +279,10 @@
             "version" : "5.020"
          },
          {
-            "class" : "Dist::Zilla::Plugin::NoTabsTests",
+            "class" : "Dist::Zilla::Plugin::Test::NoTabs",
             "config" : {
                "Dist::Zilla::Plugin::Test::NoTabs" : {
-                  "filename" : "xt/release/no-tabs.t",
+                  "filename" : "xt/author/no-tabs.t",
                   "finder" : [
                      ":InstallModules",
                      ":ExecFiles",
@@ -290,7 +290,7 @@
                   ]
                }
             },
-            "name" : "NoTabsTests",
+            "name" : "Test::NoTabs",
             "version" : "0.09"
          },
          {

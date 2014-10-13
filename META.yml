@@ -11,7 +11,7 @@ build_requires:
 configure_requires:
   ExtUtils::MakeMaker: '0'
 dynamic_config: 0
-generated_by: 'Dist::Zilla version 5.020, CPAN::Meta::Converter version 2.141520'
+generated_by: 'Dist::Zilla version 5.020, CPAN::Meta::Converter version 2.142060'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -28,7 +28,7 @@ requires:
 resources:
   bugtracker: https://rt.cpan.org/Public/Dist/Display.html?Name=MIDI-Simple-Drummer
   repository: git://github.com/ology/midi-simple-drummer.git
-version: '0.0701'
+version: '0.08'
 x_Dist_Zilla:
   perl:
     version: '5.021002'
@@ -199,15 +199,15 @@ x_Dist_Zilla:
       name: PodSyntaxTests
       version: '5.020'
     -
-      class: Dist::Zilla::Plugin::NoTabsTests
+      class: Dist::Zilla::Plugin::Test::NoTabs
       config:
         Dist::Zilla::Plugin::Test::NoTabs:
-          filename: xt/release/no-tabs.t
+          filename: xt/author/no-tabs.t
           finder:
             - ':InstallModules'
             - ':ExecFiles'
             - ':TestFiles'
-      name: NoTabsTests
+      name: Test::NoTabs
       version: '0.09'
     -
       class: Dist::Zilla::Plugin::EOLTests
